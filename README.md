@@ -5,7 +5,7 @@ Repository mit allen Files für die Diplomarbeit. An der Diplomarbeit arbeiten:
 3. Yannick Zickler (Software)
 
 ---
-TEST
+
 # Hardware
 
 Hier sind die Kicad - Platinendesigns von Roboter und Controller zu finden. Beide haben jeweils zwei Versionen, Rev A und Rev B.
