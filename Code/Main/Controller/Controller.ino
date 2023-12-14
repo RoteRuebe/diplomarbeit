@@ -11,6 +11,7 @@
 #include <SPI.h>
 #include <nRF24L01.h>
 #include <RF24.h>
+#include <printf.h>
 
 /** Parameters **/
 
@@ -19,7 +20,7 @@
 #define p_joyX A1
 #define p_joyY A0
 
-#define led xxx
+#define led 13
 
 // Which controller is ist?    
 const byte address[6] = "00001";
@@ -33,10 +34,18 @@ int data[] = {0, 0, 0, 0};
 void setup() {
   pinMode(led, OUTPUT);
   digitalWrite(led, 1);
+
+  printf_begin();
   
-  radio.begin();
+  Serial.begin(9600);
+  Serial.println();
+  Serial.print("Attempting to initialize radio module");
+  while (!radio.begin()) {Serial.print(".");delay(500);}
+  Serial.println();
   radio.openWritingPipe(address);
   radio.stopListening();
+  Serial.println("Radio initialized");
+  radio.printDetails();
 
   pinMode(p_lSchulter, INPUT);
   pinMode(p_rSchulter, INPUT);
@@ -44,10 +53,14 @@ void setup() {
   pinMode(p_joyY, INPUT);
   
   // Do nothing while not connected
-  while ( !radio.write(&data, sizeof(data)) ) {}
+  Serial.print("Attempting to write packet");
+  while ( !radio.write(&data, sizeof(data)) ) {Serial.print(".");delay(500);}
+  Serial.println();
   digitalWrite(led, 1); delay(250);
   digitalWrite(led, 0); delay(250);
   digitalWrite(led, 1);
+  Serial.println("Packet received");
+  Serial.println("Initialization complete!");
 }
 
 /** Main Loop **/

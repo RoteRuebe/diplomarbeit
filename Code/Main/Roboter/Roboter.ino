@@ -11,8 +11,6 @@
 #include <SPI.h>
 #include <nRF24L01.h>
 #include <RF24.h>
-#include <BTLE.h>
-
 /** Parameters **/
 
 const int doDebug = 1;
@@ -40,7 +38,7 @@ void drive(int left, int right);
 void rgbWrite(int r, int g, int b);
 
 const byte address[6] = "00001";
-const byte serverAddress[6] = "00000";
+const byte serverAddress[6] = "00002";
 
 int speed;
 float turn = 0;
@@ -61,17 +59,17 @@ void setup() {
   if (doDebug)
     Serial.begin(9600);
 
-   Do nothing while radio module not connected
+  //Do nothing while radio module not connected
   while ( !radio.begin() ) {}
   rgbWrite(0, 0, 1);
   
-  radio.openReadingPipe(0, address);
+  radio.openReadingPipe(1, address);
   radio.openWritingPipe(serverAddress);
   radio.setPALevel(RF24_PA_MIN);
-  radio.stopListening();
+  radio.startListening();
   
   // Do nothing while no connection
-  while ( !radio.available() || 1 ) {}
+  while ( !radio.available()) {}
   rgbWrite(0, 1, 0); delay(500); 
   rgbWrite(0, 0, 0); delay(500);
   
@@ -88,21 +86,32 @@ int lm_ist, rm_ist, lm_soll, rm_soll = 0;
 int inputs[] = { 0, 0, 0, 0 };
 byte testMsg[4] = "abc";
 int joyX, joyY, shoL, shoR;
+
+byte count = 0;
+
 void loop() {
   crntMillis = millis();
   
   if (crntMillis - prevMillis > 215) {
-    rgbWrite(1, 0, 0);
+    //rgbWrite(0, 0, 1);
     radio.stopListening();
-    radio.write( testMsg, sizeof(testMsg) );
-    //radio.startListening();
-    prevMillis = crntMillis;
+    radio.setChannel(200);
+    if( radio.write( &count, sizeof(count) )) {
+      rgbWrite(0, 1, 0);
+    }
+    else {
+      rgbWrite(1, 0, 0);
+    }
+    radio.setChannel(76);
     radio.startListening();
-    rgbWrite(0, 1, 0);
+    prevMillis = crntMillis;
+    count ++;
   }
 
-  if (radio.available())
+  if (radio.available()) {
     radio.read(inputs, sizeof(inputs));
+    //rgbWrite(0, 0, 1);
+  }
     
   joyX = inputs[0];
   joyY = inputs[1];
