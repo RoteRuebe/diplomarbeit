@@ -12,7 +12,7 @@ Hier sind die Kicad - Platinendesigns von Roboter und Controller zu finden. Beid
 
 # 3D - Modeling
 
-Hier ist zur Zeit noch nichts zu finden.
+Hier werden alle 3D Modelle und Cura 3D Setting sein.
 
 # Software
 
