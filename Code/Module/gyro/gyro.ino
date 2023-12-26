@@ -13,7 +13,7 @@ int a_x, a_y, a_z;
 int g_x, g_y, g_z;
 int sum;
 void setup(void) {
-  Serial.begin(115200);
+  Serial.begin(9600);
   mpu.begin();
 
   mpu.setAccelerometerRange(MPU6050_RANGE_8_G);
