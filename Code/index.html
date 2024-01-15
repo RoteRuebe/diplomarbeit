@@ -1,0 +1,25 @@
+<html>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js"> </script>
+    <body>
+      <p style="margin: auto;text-align: center;font-size: 40px;font-family: calibri"> Sensordaten des Sumobots </p>
+      <canvas id="myChart" style="width:100%;max-width:700px;margin-left: auto; margin-right:auto"></canvas> 
+    </body>
+    <script>
+    const xValues = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+    const yValues = [7,8,8,9,9,9,10,11,14,14,15];
+
+    const chart = new Chart("myChart", {
+      type: "line",
+      data: {
+        labels: xValues,
+        datasets: [{
+          borderColor: "blue",
+          data: yValues,
+          fill: false
+        }]
+      },
+    });
+    chart.options.animation.duration = 333;
+    setInterval( function() {chart.data.datasets[0].data.shift(); chart.data.datasets[0].data.push( Math.floor( Math.random() * 15) ); chart.update();}, 333 );
+    </script> 
+</html>
