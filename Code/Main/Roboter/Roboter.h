@@ -1,3 +1,6 @@
+#include <SPI.h>
+#include <nRF24L01.h>
+#include <RF24.h>
 
 const int doDebug = 1;
 const byte controllerAddress[6] = "00001";
@@ -20,6 +23,10 @@ RF24 radio(1, 11);
 void drive(int left, int right);
 void rgbWrite(int r, int g, int b);
 
+int logMsg(char *x);
+int sendSensorData();
+int receiveControllerData();
+
 int speed = 0;
 float turn;
 float l_motor_turn, r_motor_turn;
@@ -29,4 +36,3 @@ int lm_ist, rm_ist, lm_soll, rm_soll;
 //JoyX, JoyY, l_Button, r_Button
 int inputs[4];
 int joyX, joyY, shoL, shoR;
-
