@@ -4,11 +4,7 @@
 *   Desc: Code for the robot. Handles communication, drives motors serial Interface and LED.
 */
 
-#include <Roboter.h>
-#include <SPI.h>
-#include <nRF24L01.h>
-#include <RF24.h>
-
+#include "Roboter.h"
 
 /** Initialization **/
 
@@ -24,53 +20,31 @@ void setup() {
   
   rgbWrite(1, 0, 0);
   
-  if (doDebug)
-    Serial.begin(9600);
-
   //Do nothing while radio module not connected
   while ( !radio.begin() ) {}
   rgbWrite(0, 0, 1);
   
-  radio.openReadingPipe(1, controllerAdress);
+  radio.openReadingPipe(1, controllerAddress);
   radio.openWritingPipe(serverAddress);
   radio.setPALevel(RF24_PA_MIN);
-  radio.startListening();
-  
-  // Do nothing while no connection
-  while ( !radio.available()) {}
-  rgbWrite(0, 1, 0); delay(500); 
-  rgbWrite(0, 0, 0); delay(500);
+  radio.stopListening();
+
+  logMsg("Initalized.");
   
   rgbWrite(0, 1, 0);
   crntMillis = 0;
 }
 
-byte testMsg[4] = "abc";
-byte count = 0;
-
 void loop() {
   crntMillis = millis();
   
   if (crntMillis - prevMillis > pushDataTimestamp) {
-    //rgbWrite(0, 0, 1);
-    radio.stopListening();
-    radio.setChannel(200);
-    if( radio.write( &count, sizeof(count) )) {
-      rgbWrite(0, 1, 0);
-    }
-    else {
-      rgbWrite(1, 0, 0);
-    }
-    radio.setChannel(76);
-    radio.startListening();
+    logMsg("Sending Sensordata.");
     prevMillis = crntMillis;
-    count ++;
   }
 
-  if (radio.available()) {
+  if (radio.available())
     radio.read(inputs, sizeof(inputs));
-    //rgbWrite(0, 0, 1);
-  }
     
   joyX = inputs[0];
   joyY = inputs[1];
@@ -99,7 +73,7 @@ void loop() {
   rm_soll = r_motor_turn * speed;
 
 
-  if (doDebug) {
+  if (doDebug && 0) {
     Serial.print("X: ");
     Serial.println(inputs[0]);
     Serial.print("Y: ");
@@ -132,6 +106,7 @@ void loop() {
 
     drive(lm_ist, rm_ist);
   }
+
 }
 
 /** Functions **/
@@ -160,4 +135,12 @@ void drive(int left, int right) {
     analogWrite(p_rb, -right);
     analogWrite(p_rf, 0);
   }
+}
+
+int logMsg( char *x) {
+  radio.stopListening();
+  radio.setChannel(200);
+  radio.write( x, strlen(x) );
+  radio.startListening();
+  radio.setChannel(76);
 }
