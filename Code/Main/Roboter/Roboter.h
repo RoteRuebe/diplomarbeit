@@ -1,6 +1,7 @@
 #include <SPI.h>
 #include <nRF24L01.h>
 #include <RF24.h>
+#include <stdio.h>
 
 const int doDebug = 1;
 const byte controllerAddress[6] = "00001";
@@ -18,7 +19,7 @@ const int pushDataTimestamp = 215;
 #define p_rb 4  //Right Backward Pin
 
 //CSN, CE
-RF24 radio(1, 11); 
+RF24 radio(13, 12); 
 
 void drive(int left, int right);
 void rgbWrite(int r, int g, int b);

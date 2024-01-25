@@ -40,6 +40,7 @@ void loop() {
   
   if (crntMillis - prevMillis > pushDataTimestamp) {
     logMsg("Sending Sensordata.");
+    logData();
     prevMillis = crntMillis;
   }
 
@@ -137,10 +138,26 @@ void drive(int left, int right) {
   }
 }
 
-int logMsg( char *x) {
+int logMsg(char *x) {
   radio.stopListening();
   radio.setChannel(200);
-  radio.write( x, strlen(x) );
+  char msg[] = "log, ";
+  strcat(msg, x);
+  radio.write( &msg, strlen(msg) );
+  radio.startListening();
+  radio.setChannel(76);
+}
+
+byte count = 0;
+int logData() {
+  count ++;  
+  radio.stopListening();
+  radio.setChannel(200);
+  char msg[] = "data, ";
+  char x[64];
+  sprintf(x, "%d", 42);
+  strcat(msg, x);
+  radio.write( &msg, strlen(msg) );
   radio.startListening();
   radio.setChannel(76);
 }
