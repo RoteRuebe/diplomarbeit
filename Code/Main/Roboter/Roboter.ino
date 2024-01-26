@@ -17,6 +17,7 @@ void setup() {
   pinMode(p_red, OUTPUT);
   pinMode(p_green, OUTPUT);
   pinMode(p_blue, OUTPUT);
+  pinMode(p_vibration, INPUT);
   
   rgbWrite(1, 0, 0);
   
@@ -28,25 +29,30 @@ void setup() {
   radio.openWritingPipe(serverAddress);
   radio.setPALevel(RF24_PA_MIN);
   radio.stopListening();
-
-  logMsg("Initalized.");
-  
   rgbWrite(0, 1, 0);
+  
+  logMsg("Initalized.");
   crntMillis = 0;
 }
 
+int data = 0;
+char data_str[16] = "0";
 void loop() {
   crntMillis = millis();
   
   if (crntMillis - prevMillis > pushDataTimestamp) {
     logMsg("Sending Sensordata.");
-    logData();
+    data = digitalRead(p_vibration);
+    sprintf(data_str, "%d", data);
+    sendSensorData( data_str );
     prevMillis = crntMillis;
   }
 
-  if (radio.available())
-    radio.read(inputs, sizeof(inputs));
-    
+  if (radio.available()) {
+    radio.read(inputs, sizeof(inputs)); 
+    logMsg("Inputs received");     
+  }
+  
   joyX = inputs[0];
   joyY = inputs[1];
   shoL = inputs[2];
@@ -58,8 +64,7 @@ void loop() {
   else
     speed = -shoL;
   
-  turn = (float)joyX / 256.0;
-  
+  turn = (float)joyX / 256.0;  
   if (joyX < 0) {
     l_motor_turn = map(turn, -1, 0, -1, 1);
     r_motor_turn = 1;
@@ -72,7 +77,6 @@ void loop() {
   
   lm_soll = l_motor_turn * speed;
   rm_soll = r_motor_turn * speed;
-
 
   if (doDebug && 0) {
     Serial.print("X: ");
@@ -138,26 +142,27 @@ void drive(int left, int right) {
   }
 }
 
-int logMsg(char *x) {
+int logMsg( char *x) {
+  int resp;
+  
   radio.stopListening();
   radio.setChannel(200);
-  char msg[] = "log, ";
+  char msg[32] = "log,";
   strcat(msg, x);
-  radio.write( &msg, strlen(msg) );
+  resp = radio.write( &msg, sizeof(msg) );
   radio.startListening();
   radio.setChannel(76);
+  return resp;
 }
 
-byte count = 0;
-int logData() {
-  count ++;  
+int sendSensorData( char *x) {
+  int resp;
   radio.stopListening();
   radio.setChannel(200);
-  char msg[] = "data, ";
-  char x[64];
-  sprintf(x, "%d", 42);
+  char msg[8] = "data,";
   strcat(msg, x);
-  radio.write( &msg, strlen(msg) );
+  resp = radio.write( &msg, sizeof(msg) );
   radio.startListening();
   radio.setChannel(76);
+  return resp;
 }
