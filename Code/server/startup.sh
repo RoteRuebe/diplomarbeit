@@ -5,6 +5,8 @@ rm log.txt
 echo "" > log.txt
 rm data.txt
 echo "" > log.txt
+rm radio_log.txt
+rm php_log.txt
 
 python3 radio.py > radio_log.txt &
 echo "Radio module started"

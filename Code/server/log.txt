@@ -1,2 +1,0 @@
-ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICCLyx9U9bXNvAZabYwlEH4ncjs6OULG8zME7yvsxnpo yannick.zickler@gmail.com
-

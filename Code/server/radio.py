@@ -26,12 +26,29 @@ def process(x):
 
     if tag == "log":
         with open("log.txt", "at") as f:
-            f.write(payload + "\n")
+            for char in payload:
+                if (char != "\x00"):
+                    f.write(char)
+                else:
+                    f.write("\n")
+                    break;
 
+    elif tag == "data":
+        with open("data.txt", "at") as f:
+            for char in payload:
+                if (char != "\x00"):
+                    f.write(char)
+                else:
+                    f.write("\n")
+                    break;
+
+print("radio started")
 while True:
     if (radio.available() ):
         rec = radio.read()
+        print("received:")
         print(rec)
         rec = rec.decode("utf-8")
+        print("processed:")
         print(rec)
         process(rec)
