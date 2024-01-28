@@ -34,6 +34,7 @@
       .box {
         position: relative;
         display: inline-block;
+        border-radius: 30%;
 
         width: 13px;
         height: 13px;
@@ -50,7 +51,9 @@
 
       #chart {
         width: 100%;
+        height: 50%;
       }
+
     </style>
   </head>
 
