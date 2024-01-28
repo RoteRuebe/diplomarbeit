@@ -9,6 +9,7 @@
 /** Initialization **/
 
 void setup() {
+  // Setup Pins
   pinMode(p_lf, OUTPUT);
   pinMode(p_lb, OUTPUT);
   pinMode(p_rf, OUTPUT);
@@ -21,10 +22,11 @@ void setup() {
   
   rgbWrite(1, 0, 0);
   
-  //Do nothing while radio module not connected
+  // Do nothing while radio module not connected
   while ( !radio.begin() ) {}
   rgbWrite(0, 0, 1);
   
+  // Open Radio pipes
   radio.openReadingPipe(1, controllerAddress);
   radio.openWritingPipe(serverAddress);
   radio.setPALevel(RF24_PA_MIN);
@@ -41,6 +43,7 @@ void loop() {
   crntMillis = millis();
   
   if (crntMillis - prevMillis > pushDataTimestamp) {
+    // Push sensor data
     logMsg("Sending Sensordata.");
     data = digitalRead(p_vibration);
     sprintf(data_str, "%d", data);
@@ -58,6 +61,7 @@ void loop() {
   shoL = inputs[2];
   shoR = inputs[3];
 
+  // Calculate Motor speeds
   if (shoR > shoL)
     speed = shoR;
 
@@ -96,6 +100,7 @@ void loop() {
     Serial.println();
   }
 
+  // Slow down acceleration of motors
   else {
     if (lm_ist > lm_soll)
       lm_ist -= 1;
@@ -144,14 +149,16 @@ void drive(int left, int right) {
 
 int logMsg( char *x) {
   int resp;
-  
   radio.stopListening();
   radio.setChannel(200);
+
   char msg[32] = "log,";
   strcat(msg, x);
   resp = radio.write( &msg, sizeof(msg) );
+
   radio.startListening();
   radio.setChannel(76);
+
   return resp;
 }
 
@@ -159,10 +166,13 @@ int sendSensorData( char *x) {
   int resp;
   radio.stopListening();
   radio.setChannel(200);
+
   char msg[8] = "data,";
   strcat(msg, x);
   resp = radio.write( &msg, sizeof(msg) );
+
   radio.startListening();
   radio.setChannel(76);
+
   return resp;
 }
