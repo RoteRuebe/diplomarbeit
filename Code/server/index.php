@@ -1,32 +1,84 @@
+<!DOCTYPE html>
 
 <html>
   <head>
+    <title> SumoBots </title>
+    <script src = "https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js"> </script>
+    <link rel="icon" type="image/png" href="/favicon.png"> </link>
     <style>
+      html, body {
+        font-family: helvetica;
+      }
+
+      p {
+        position:relative;
+      }
+
+      textarea {
+        position: relative;
+        width: 100%;
+        height: 50%;
+      }
+
+      li {
+        list-style-type: none;
+      }
+      .column {
+        position: absolute;
+        width: 30%;
+        height: 100%;
+        top: 0px;
+        padding: 3%
+      }
+
+      .box {
+        position: relative;
+        display: inline-block;
+
+        width: 13px;
+        height: 13px;
+        top: 0px;
+        left: 0px;
+        background-color: red;
+      }
+
       #log {
-        float: left;
-        width: 500px;
+        width: 33%;
         height: 800px;
         white-space: pre-line;
       }
 
       #chart {
-        float: right;
         width: 100%;
-        max-width: 700px;
       }
     </style>
   </head>
 
 
   <body>
-    <p>
-      Log Nachrichten des Roboters:
-    </p>
-    <textarea id="log_text" rows= 30, cols = 50> </textarea>
-    
-    <canvas id="chart"> </canvas>
+    <div id="column1" class="column">
+      <p style="text-align: center">
+        Log Nachrichten des Roboters.
+      </p>
+      <textarea id="log_text" readonly=true> </textarea>
 
-    <script src = "https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js"> </script>
+      <form action="/index.php" method="post">
+        <input type="text" id="message" placeholder="Command to robot"> </input>
+        <input type="submit" id="submit" value="Send"> </input>
+      </form>
+    </div>
+
+    <div id="column2" style="left: 33%" class="column">
+      <canvas id="chart"> </canvas>
+    </div>
+
+    <div id="column3" style="left: 66%" class="column">
+      <ul>
+        <li> <div class="box" style="background-color: green"></div> &ensp; Robot connected </li>
+        <li> <div class="box"></div> &ensp; Controller disconnected </li>
+        <li> <div class="box"></div> &ensp; Camera disconnected </li>
+    </div>
+
     <script>
       let xValues = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
       let yValues = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
@@ -60,5 +112,6 @@
       }
       setInterval(getData, 1000);
     </script>
+
   </body>
 </html>
