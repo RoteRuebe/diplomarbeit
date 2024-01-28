@@ -77,6 +77,7 @@
         <li> <div class="box" style="background-color: green"></div> &ensp; Robot connected </li>
         <li> <div class="box"></div> &ensp; Controller disconnected </li>
         <li> <div class="box"></div> &ensp; Camera disconnected </li>
+      </ul>
     </div>
 
     <script>
