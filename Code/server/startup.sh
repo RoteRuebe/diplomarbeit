@@ -10,5 +10,6 @@ rm php_log.txt
 
 python3 radio.py > radio_log.txt &
 echo "Radio module started"
-php -t ./ -q -S 172.24.5.105:8080 > php_log.txt &
+
+php -t ./ -S 172.24.5.105:8080 > php_log.txt &
 echo "Server started"
