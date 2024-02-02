@@ -1,13 +1,4 @@
-<?php
-  if ( $_SERVER["REQUEST_METHOD"] == "POST") {
-    $msg = htmlspecialchars( $_POST["message"] );
-    if (!empty($msg)) {
-      $file = fopen("msg_to_robot.txt", "w");
-      fwrite( $file, $msg);
-      fclose( $file );
-    }
-  }
-?>
+<!DOCTYPE html>
 
 <html>
   <head>
@@ -75,8 +66,8 @@
       <textarea id="log_text" readonly=true> </textarea>
 
       <form action="/index.php" method="post">
-        <input type="text" id="message" name="message" placeholder="Command to robot"> </input>
-        <input type="submit" id="submit" name="submit" value="Send"> </input>
+        <input type="text" id="message" placeholder="Command to robot"> </input>
+        <input type="submit" id="submit" value="Send"> </input>
       </form>
     </div>
 
@@ -123,7 +114,7 @@
         chart["data"]["datasets"][0]["data"] = arr.slice(-11);
         chart.update()
       }
-      //setInterval(getData, 1000);
+      setInterval(getData, 1000);
     </script>
 
   </body>
