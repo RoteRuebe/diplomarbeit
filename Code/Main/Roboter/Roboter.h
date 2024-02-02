@@ -23,10 +23,9 @@ const int pushDataTimestamp = 500;
 //CE, CSN
 //RF24 radio(1, 11); 
 RF24 radio(13, 12); 
-
 void drive(int left, int right);
 void rgbWrite(int r, int g, int b);
-
+float fmap(float x, float in_min, float in_max, float out_min, float out_max);
 int logMsg(char *x);
 int sendSensorData();
 int receiveControllerData();

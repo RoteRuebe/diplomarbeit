@@ -27,13 +27,13 @@ void setup() {
   rgbWrite(0, 0, 1);
   
   // Open Radio pipes
-  radio.openReadingPipe(1, controllerAddress);
-  radio.openWritingPipe(serverAddress);
+  radio.openReadingPipe(0, controllerAddress);
+  //radio.openWritingPipe(serverAddress);
   radio.setPALevel(RF24_PA_MIN);
-  radio.stopListening();
+  radio.startListening();
   rgbWrite(0, 1, 0);
   
-  logMsg("Initalized.");
+  //logMsg("Initalized.");
   crntMillis = 0;
 }
 
@@ -42,7 +42,7 @@ char data_str[16] = "0";
 void loop() {
   crntMillis = millis();
   
-  if (crntMillis - prevMillis > pushDataTimestamp) {
+  if (crntMillis - prevMillis > pushDataTimestamp || 0) {
     // Push sensor data
     logMsg("Sending Sensordata.");
     data = digitalRead(p_vibration);
@@ -70,13 +70,13 @@ void loop() {
   
   turn = (float)joyX / 256.0;  
   if (joyX < 0) {
-    l_motor_turn = map(turn, -1, 0, -1, 1);
-    r_motor_turn = 1;
+    l_motor_turn = fmap(turn, -1.0, 0.0, -1.0, 1.0);
+    r_motor_turn = 1.0;
   }
 
   else if (joyX >= 0) {
-    l_motor_turn = 1;
-    r_motor_turn = map(turn, 0, 1, 1, -1);
+    l_motor_turn = 1.0;
+    r_motor_turn = fmap(turn, 0.0, 1.0, 1.0, -1.0);
   }
   
   lm_soll = l_motor_turn * speed;
@@ -175,4 +175,8 @@ int sendSensorData( char *x) {
   radio.setChannel(76);
 
   return resp;
+}
+
+float fmap(float x, float in_min, float in_max, float out_min, float out_max) {
+  return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 }

@@ -22,7 +22,7 @@
 const byte robotAddress[6] = "00001";
 
 // CE, CSN
-RF24 radio(9, 10); 
+RF24 radio(9, 10);
 
 /** Initialization **/
 int data[] = {0, 0, 0, 0};
@@ -40,6 +40,8 @@ void setup() {
   Serial.println();
   radio.openWritingPipe(robotAddress);
   radio.stopListening();
+  radio.setChannel(76);
+  radio.setPALevel(RF24_PA_MIN);
   Serial.println("Radio initialized");
   radio.printDetails();
 
@@ -62,13 +64,8 @@ void setup() {
 /** Main Loop **/
 
 void loop() {
-/*
   data[0] = analogRead(p_joyX);
   data[1] = analogRead(p_joyY);
-*/
-
-  data[0] = 0;
-  data[1] = 0;
   data[2] = analogRead(p_lSchulter);
   data[3] = analogRead(p_rSchulter);
   
