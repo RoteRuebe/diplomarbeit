@@ -27,11 +27,12 @@ void setup() {
   while ( !radio.begin() ) {}
   rgbWrite(0, 0, 1);
   
-  radio.setPALevel(RF24_PA_MIN);
-  
   // Open Radio pipes
   radio.openReadingPipe(0, controllerAddress);
   radio.startListening();
+  radio.setChannel(76);
+  radio.setPALevel(RF24_PA_MIN);
+  
   //radio.openWritingPipe(serverAddress);
 
   //logMsg("Initalized.");
@@ -81,8 +82,8 @@ void loop() {
     r_motor_turn = fmap(turn, 0.0, 1.0, 1.0, -1.0);
   }
   
-  lm_soll = l_motor_turn * speed;
-  rm_soll = r_motor_turn * speed;
+  lm_soll = (int)(l_motor_turn * speed);
+  rm_soll = (int)(r_motor_turn * speed);
 
   if (doDebug) {
     logMsg("X: ", 0);
@@ -111,7 +112,6 @@ void loop() {
 
     drive(lm_ist, rm_ist);
   }
-
 }
 
 /** Functions **/
@@ -123,6 +123,7 @@ void rgbWrite(int r, int g, int b) {
 }
 
 void drive(int left, int right) {
+  left = -left;
   if (left > 0) {
     analogWrite(p_lf, left);
     analogWrite(p_lb, 0);
