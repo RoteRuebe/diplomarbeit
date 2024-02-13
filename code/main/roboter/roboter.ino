@@ -30,11 +30,11 @@ void setup() {
   radio.setPALevel(RF24_PA_MIN);
   
   // Open Radio pipes
-  radio.openReadingPipe(1, controllerAddress);
-  radio.stopListening();
-  radio.openWritingPipe(serverAddress);
+  radio.openReadingPipe(0, controllerAddress);
+  radio.startListening();
+  //radio.openWritingPipe(serverAddress);
 
-  logMsg("Initalized.");
+  //logMsg("Initalized.");
   rgbWrite(0, 1, 0);
 }
 
@@ -46,16 +46,16 @@ void loop() {
     int d_vibration = digitalRead(p_vibration);
 
     char data_str[16];
-    sprintf(data_str, "%d", data);
+    sprintf(data_str, "%d", d_vibration);
 
-    logMsg("Sending Sensordata.", 0);
-    sendSensorData( data_str );
+    //logMsg("Sending Sensordata.", 0);
+    //sendSensorData( data_str );
     prevMillis = crntMillis;
   }
 
   if (radio.available()) {
     radio.read(inputs, sizeof(inputs)); 
-    logMsg("Inputs received");     
+    //logMsg("Inputs received");     
   }
   
   joyX = inputs[0];
@@ -152,6 +152,7 @@ int logMsg(char *x, int listenAfter = 1) {
   resp = radio.write( &msg, sizeof(msg) );
 
   if (listenAfter) {
+    radio.openReadingPipe(1, controllerAddress);
     radio.startListening();
     radio.setChannel(76);
   }
@@ -162,6 +163,7 @@ int logMsg(char *x, int listenAfter = 1) {
 int sendSensorData(char *x, int listenAfter = 1) {
   int resp;
   radio.stopListening();
+  radio.openWritingPipe( serverAddress );
   radio.setChannel(200);
 
   char msg[8] = "data,";
@@ -169,6 +171,7 @@ int sendSensorData(char *x, int listenAfter = 1) {
   resp = radio.write( &msg, sizeof(msg) );
 
   if (listenAfter) {
+    radio.openReadingPipe(1, controllerAddress);
     radio.startListening();
     radio.setChannel(76);
   }

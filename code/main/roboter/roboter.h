@@ -25,7 +25,7 @@ void drive(int left, int right);
 void rgbWrite(int r, int g, int b);
 float fmap(float x, float in_min, float in_max, float out_min, float out_max);
 int logMsg(char *x, int listenAfter = 1);
-int sendSensorData(int listenAfter = 1);
+int sendSensorData(char* x, int listenAfter = 1);
 
 int speed = 0;
 float turn;

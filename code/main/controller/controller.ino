@@ -68,7 +68,8 @@ void loop() {
   data[1] = analogRead(p_joyY);
   data[2] = analogRead(p_lSchulter);
   data[3] = analogRead(p_rSchulter);
-  
-  radio.write(&data, sizeof(data));
+
+  Serial.print( data[0] ); Serial.print(", "); Serial.print( data[1] ); Serial.print(", "); Serial.print( data[2] ); Serial.print(", "); Serial.print( data[3] ); Serial.print(", ");
+  Serial.println( radio.write(&data, sizeof(data)) );
   delay(1);
 }
