@@ -4,7 +4,7 @@
 *   Desc: Code for the robot. Handles communication, drives motors serial Interface and LED.
 */
 
-#include "Roboter.h"
+#include "roboter.h"
 
 /** Initialization **/
 
@@ -28,15 +28,23 @@ void setup() {
   rgbWrite(0, 0, 1);
   
   // Open Radio pipes
-  radio.openReadingPipe(0, controllerAddress);
+  radio.openReadingPipe(1, controllerAddress);
+  radio.openWritingPipe(serverAddress);
+  
   radio.startListening();
   radio.setChannel(76);
   radio.setPALevel(RF24_PA_MIN);
   
-  //radio.openWritingPipe(serverAddress);
-
-  //logMsg("Initalized.");
+  logMsg("Radio initalized.");
   rgbWrite(0, 1, 0);
+
+  mpu.begin();
+  mpu.setAccelerometerRange(MPU6050_RANGE_8_G);
+  mpu.setGyroRange(MPU6050_RANGE_500_DEG);
+  mpu.setFilterBandwidth(MPU6050_BAND_260_HZ);
+
+  logMsg("Gyro Initialized.");
+  
 }
 
 void loop() {
@@ -44,13 +52,13 @@ void loop() {
   
   if (crntMillis - prevMillis > pushDataTimestamp) {
     // Push sensor data
-    int d_vibration = digitalRead(p_vibration);
+    mpu.getEvent(&gyro_a, &gyro_g, &gyro_temp);
 
     char data_str[16];
-    sprintf(data_str, "%d", d_vibration);
+    sprintf(data_str, "%d", gyro_g.gyro.x);
 
-    //logMsg("Sending Sensordata.", 0);
-    //sendSensorData( data_str );
+    logMsg("Sending Sensordata.");
+    sendSensorData( data_str );
     prevMillis = crntMillis;
   }
 
@@ -146,16 +154,13 @@ void drive(int left, int right) {
 int logMsg(char *x, int listenAfter = 1) {
   int resp;
   radio.stopListening();
-  radio.setChannel(200);
 
   char msg[32] = "log,";
   strcat(msg, x);
   resp = radio.write( &msg, sizeof(msg) );
 
   if (listenAfter) {
-    radio.openReadingPipe(1, controllerAddress);
     radio.startListening();
-    radio.setChannel(76);
   }
 
   return resp;
@@ -165,16 +170,13 @@ int sendSensorData(char *x, int listenAfter = 1) {
   int resp;
   radio.stopListening();
   radio.openWritingPipe( serverAddress );
-  radio.setChannel(200);
 
   char msg[8] = "data,";
   strcat(msg, x);
   resp = radio.write( &msg, sizeof(msg) );
 
   if (listenAfter) {
-    radio.openReadingPipe(1, controllerAddress);
     radio.startListening();
-    radio.setChannel(76);
   }
 
   return resp;
