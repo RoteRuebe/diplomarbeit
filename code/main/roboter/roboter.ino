@@ -35,8 +35,16 @@ void setup() {
   radio.setChannel(76);
   radio.setPALevel(RF24_PA_MIN);
   
-  logMsg("Initalized.");
+  logMsg("Radio initalized.");
   rgbWrite(0, 1, 0);
+
+  mpu.begin();
+  mpu.setAccelerometerRange(MPU6050_RANGE_8_G);
+  mpu.setGyroRange(MPU6050_RANGE_500_DEG);
+  mpu.setFilterBandwidth(MPU6050_BAND_260_HZ);
+
+  logMsg("Gyro Initialized.");
+  
 }
 
 void loop() {
@@ -44,10 +52,10 @@ void loop() {
   
   if (crntMillis - prevMillis > pushDataTimestamp) {
     // Push sensor data
-    int d_vibration = digitalRead(p_vibration);
+    mpu.getEvent(&gyro_a, &gyro_g, &gyro_temp);
 
     char data_str[16];
-    sprintf(data_str, "%d", d_vibration);
+    sprintf(data_str, "%d", gyro_g.gyro.x);
 
     logMsg("Sending Sensordata.");
     sendSensorData( data_str );

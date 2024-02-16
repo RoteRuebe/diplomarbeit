@@ -3,6 +3,10 @@
 #include <RF24.h>
 #include <string.h>
 
+#include <Adafruit_MPU6050.h>
+#include <Adafruit_Sensor.h>
+#include <Wire.h>
+
 #define p_red 8
 #define p_green 7
 #define p_blue 6
@@ -35,3 +39,8 @@ int lm_ist, rm_ist, lm_soll, rm_soll;
 
 int inputs[4];
 int joyX, joyY, shoL, shoR;
+
+
+Adafruit_MPU6050 mpu;
+int gyro_a_x, gyro_a_y, gyro_a_z, gyro_g_x, gyro_g_y, gyro_g_z;
+sensors_event_t gyro_a, gyro_g, gyro_temp;
