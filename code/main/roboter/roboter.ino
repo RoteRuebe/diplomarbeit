@@ -4,7 +4,7 @@
 *   Desc: Code for the robot. Handles communication, drives motors serial Interface and LED.
 */
 
-#include "Roboter.h"
+#include "roboter.h"
 
 /** Initialization **/
 
@@ -28,14 +28,14 @@ void setup() {
   rgbWrite(0, 0, 1);
   
   // Open Radio pipes
-  radio.openReadingPipe(0, controllerAddress);
+  radio.openReadingPipe(1, controllerAddress);
+  radio.openWritingPipe(serverAddress);
+  
   radio.startListening();
   radio.setChannel(76);
   radio.setPALevel(RF24_PA_MIN);
   
-  //radio.openWritingPipe(serverAddress);
-
-  //logMsg("Initalized.");
+  logMsg("Initalized.");
   rgbWrite(0, 1, 0);
 }
 
@@ -49,8 +49,8 @@ void loop() {
     char data_str[16];
     sprintf(data_str, "%d", d_vibration);
 
-    //logMsg("Sending Sensordata.", 0);
-    //sendSensorData( data_str );
+    logMsg("Sending Sensordata.");
+    sendSensorData( data_str );
     prevMillis = crntMillis;
   }
 
@@ -146,16 +146,17 @@ void drive(int left, int right) {
 int logMsg(char *x, int listenAfter = 1) {
   int resp;
   radio.stopListening();
-  radio.setChannel(200);
 
   char msg[32] = "log,";
   strcat(msg, x);
   resp = radio.write( &msg, sizeof(msg) );
+  if (!resp) {
+    rgbWrite(1, 0, 0);
+    delay(500);
+  }
 
   if (listenAfter) {
-    radio.openReadingPipe(1, controllerAddress);
     radio.startListening();
-    radio.setChannel(76);
   }
 
   return resp;
@@ -165,16 +166,13 @@ int sendSensorData(char *x, int listenAfter = 1) {
   int resp;
   radio.stopListening();
   radio.openWritingPipe( serverAddress );
-  radio.setChannel(200);
 
   char msg[8] = "data,";
   strcat(msg, x);
   resp = radio.write( &msg, sizeof(msg) );
 
   if (listenAfter) {
-    radio.openReadingPipe(1, controllerAddress);
     radio.startListening();
-    radio.setChannel(76);
   }
 
   return resp;
