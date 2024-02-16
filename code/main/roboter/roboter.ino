@@ -150,10 +150,6 @@ int logMsg(char *x, int listenAfter = 1) {
   char msg[32] = "log,";
   strcat(msg, x);
   resp = radio.write( &msg, sizeof(msg) );
-  if (!resp) {
-    rgbWrite(1, 0, 0);
-    delay(500);
-  }
 
   if (listenAfter) {
     radio.startListening();
