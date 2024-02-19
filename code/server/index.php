@@ -96,7 +96,9 @@
             fill: false
           }]
         },
-        options: {}
+        options: {
+            animation: {duration: 75}
+        }
       });
 
       const chart_acc = new Chart("chart_acc", {
@@ -120,7 +122,9 @@
             fill: false
           }
         ]},
-        options: {}
+        options: {
+            animation: {duration: 75}
+        }
       });
 
       const chart_gyro = new Chart("chart_gyro", {
@@ -144,7 +148,9 @@
             fill: false
           }
         ]},
-        options: {}
+        options: {
+            animation: {duration: 75}
+        }
       });
 
 
@@ -192,7 +198,7 @@
         chart_gyro.update()
         chart_vibration.update()
       }
-      setInterval(getData, 500);
+      setInterval(getData, 50);
     </script>
 
   </body>

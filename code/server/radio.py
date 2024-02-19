@@ -18,16 +18,12 @@ radio.listen = True
 
 radio.print_details()
 x = 0
-
 def write_log(filename, x):
     with open(f"./logs/{filename}.txt", "at") as f:
-        print("Writing: "+x.split("\x00")[0] )
         f.write( x.split("\x00")[0] + "\n") 
 
 def process(x):
     x = x.split(",")
-    print("proccessed:")
-    print(x)
 
     if x[0] == "log":
         write_log("log", x[1])
@@ -48,12 +44,9 @@ def process(x):
     elif x[0] == "temp":
         write_log("temp", x[1])
 
-print("radio started")
 while True:
     if (radio.available() ):
         rec = radio.read()
-        print("received:")
-        print(rec)
         rec = rec.decode("utf-8")
 
         try:
