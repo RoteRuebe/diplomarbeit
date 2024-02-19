@@ -172,8 +172,14 @@ int sendSensorData() {
 
   sensors_event_t a, g, temp;
   mpu.getEvent(&a, &g, &temp);
-  sprintf(data, "gyro,%d,%d,%d,%d,%d,%d,%d", a.acceleration.x, a.acceleration.y, a.acceleration.z, g.gyro.x, g.gyro.y, g.gyro.z, temp.temperature);
-  response = response & radio.write(&data, sizeof(data));
+  a.acceleration.x, a.acceleration.y, a.acceleration.z ,%d,%d,%d);
+  response &= radio.write(&data, sizeof(data));
+
+  sprintf(data, "gyro,%d,%d,%d", g.gyro.x, g.gyro.y, g.gyro.z);
+  response &= radio.write(&data, sizeof(data));
+
+  sprintf(data, "temp,%d", temp.temperature);
+  response &= radio.write(&data, sizeof(data));
 
   radio.startListening();
   return response;

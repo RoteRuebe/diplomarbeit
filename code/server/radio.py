@@ -35,16 +35,18 @@ def process(x):
     elif x[0] == "vibration":
         write_log("vibration",x[1])
 
-    elif x[0] == "gyro":
+    elif x[0] == "acc":
         write_log("acc_x", x[1])
         write_log("acc_y", x[2])
         write_log("acc_z", x[3])
   
-        write_log("gyro_x", x[4])
-        write_log("gyro_y", x[5])
-        write_log("gyro_z", x[6])
+    elif x[0] == "gyro":
+        write_log("gyro_x", x[1])
+        write_log("gyro_y", x[2])
+        write_log("gyro_z", x[3])
 
-        write_log("temp", x[7])
+    elif x[0] == "temp":
+        write_log("temp", x[1])
 
 print("radio started")
 while True:
