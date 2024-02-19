@@ -12,43 +12,39 @@ address = b"00002"
 
 radio.begin()
 radio.openReadingPipe(0, address)
-radio.setChannel(200);
 radio.setPALevel(RF24_PA_MAX)
 
 radio.listen = True
 
 radio.print_details()
-
 x = 0
 
 def write_log(filename, x):
-     with open(f"./logs/{filename}.txt", "at") as f:
-        for char in payload:
-            if (char != "\x00"):
-                f.write(char)
-            else:
-                f.write("\n")
-                return;
+    with open(f"./logs/{filename}.txt", "at") as f:
+        print("Writing: "+x.split("\x00")[0] )
+        f.write( x.split("\x00")[0] + "\n") 
 
 def process(x):
-    tag, payload = x.split(",")
+    x = x.split(",")
+    print("proccessed:")
+    print(x)
 
-    if tag == "log":
-        write_log("log", payload)
+    if x[0] == "log":
+        write_log("log", x[1])
 
-    elif tag == "vibration":
-        write_log("vibration",payload)
+    elif x[0] == "vibration":
+        write_log("vibration",x[1])
 
-    elif tag == "gyro":
-        write_log("acc_x", payload[0])
-        write_log("acc_y", payload[1])
-        write_log("acc_z", payload[2])
+    elif x[0] == "gyro":
+        write_log("acc_x", x[1])
+        write_log("acc_y", x[2])
+        write_log("acc_z", x[3])
+  
+        write_log("gyro_x", x[4])
+        write_log("gyro_y", x[5])
+        write_log("gyro_z", x[6])
 
-        write_log("gyro_x", payload[3])
-        write_log("gyro_y", payload[4])
-        write_log("gyro_z", payload[5])
-
-        write_log("temp", payload[6])
+        write_log("temp", x[7])
 
 print("radio started")
 while True:
@@ -57,7 +53,7 @@ while True:
         print("received:")
         print(rec)
         rec = rec.decode("utf-8")
-        print("processed:")
-        print(rec)
 
-        process(rec)
+        try:
+            process(rec)
+        except Exception as e: continue
