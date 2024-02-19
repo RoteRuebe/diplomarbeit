@@ -28,9 +28,7 @@ void setup() {
   
   // Open Radio pipes
   radio.openReadingPipe(1, controllerAddress);
-  radio.openWritingPipe(serverAddress);
-  
-  radio.startListening();
+  radio.openWritingPipe(serverAddress); 
   radio.setPALevel(RF24_PA_MIN);
   
   if(logMsg("Radio initalized."))
@@ -44,7 +42,7 @@ void setup() {
   mpu.setFilterBandwidth(MPU6050_BAND_260_HZ);
 
   logMsg("Gyro Initialized.");
-  
+  logMsg("Initialization complete.");  
 }
 
 void loop() {
@@ -52,7 +50,6 @@ void loop() {
   
   if (crntMillis - prevMillis > pushDataTimestamp) {
     // Push sensor data
-    logMsg("Sending Sensordata.");
     sendSensorData();
     prevMillis = crntMillis;
   }
@@ -167,13 +164,16 @@ int sendSensorData() {
 
   int response;
   char data[32] = {0};
-  sprintf(data, "vibration,%d", digitalRead(p_vibration));
-  response = radio.write( &data, sizeof(data) );
-
+  
   sensors_event_t a, g, temp;
   mpu.getEvent(&a, &g, &temp);
-  a.acceleration.x, a.acceleration.y, a.acceleration.z ,%d,%d,%d);
+  
+  sprintf(data, "acc,%d,%d,%d",  
+  a.acceleration.x, a.acceleration.y, a.acceleration.z);
   response &= radio.write(&data, sizeof(data));
+
+  sprintf(data, "vibration,%d", digitalRead(p_vibration));
+  response = radio.write( &data, sizeof(data) );
 
   sprintf(data, "gyro,%d,%d,%d", g.gyro.x, g.gyro.y, g.gyro.z);
   response &= radio.write(&data, sizeof(data));
