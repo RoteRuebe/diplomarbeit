@@ -25,18 +25,18 @@ void setup() {
   
   // Do nothing while radio module not connected
   while ( !radio.begin() ) {}
-  rgbWrite(0, 0, 1);
   
   // Open Radio pipes
   radio.openReadingPipe(1, controllerAddress);
   radio.openWritingPipe(serverAddress);
   
   radio.startListening();
-  radio.setChannel(76);
   radio.setPALevel(RF24_PA_MIN);
   
-  logMsg("Radio initalized.");
-  rgbWrite(0, 1, 0);
+  if(logMsg("Radio initalized."))
+    rgbWrite(0, 1, 0);
+  else
+    rgbWrite(0, 0, 1);
 
   mpu.begin();
   mpu.setAccelerometerRange(MPU6050_RANGE_8_G);
@@ -53,7 +53,7 @@ void loop() {
   if (crntMillis - prevMillis > pushDataTimestamp) {
     // Push sensor data
     logMsg("Sending Sensordata.");
-    sendSensorData( data_str );
+    sendSensorData();
     prevMillis = crntMillis;
   }
 
@@ -61,7 +61,6 @@ void loop() {
     radio.read(inputs, sizeof(inputs)); 
     //logMsg("Inputs received");     
   }
-  
   joyX = inputs[0];
   joyY = inputs[1];
   shoL = inputs[2];
@@ -89,6 +88,7 @@ void loop() {
   rm_soll = (int)(r_motor_turn * speed);
 
   if (doDebug) {
+    /**
     logMsg("X: ", 0);
     logMsg(inputs[0], 0);
     logMsg("Y: ", 0);
@@ -97,6 +97,7 @@ void loop() {
     logMsg(inputs[2], 0);
     logMsg("R: ", 0);
     logMsg(inputs[3]);
+    */
   }
 
   // Slow down acceleration of motors
@@ -165,16 +166,16 @@ int sendSensorData() {
   radio.stopListening();
 
   int response;
-  char data[32];
+  char data[32] = {0};
   sprintf(data, "vibration,%d", digitalRead(p_vibration));
   response = radio.write( &data, sizeof(data) );
 
-  sensors_event_t gyro_a, gyro_g, gyro_temp;
-  mpu.getEvent(&gyro_a, &gyro_g, &gyro_temp);
-  sprintf(data, "gyro,%d,%d,%d,%d,%d,%d,%d", 
-  a.acceleration.x, a.acceleration.y, a.acceleration.z, g.gyro.x, g.gyro.y, g.gyro.z);
+  sensors_event_t a, g, temp;
+  mpu.getEvent(&a, &g, &temp);
+  sprintf(data, "gyro,%d,%d,%d,%d,%d,%d,%d", a.acceleration.x, a.acceleration.y, a.acceleration.z, g.gyro.x, g.gyro.y, g.gyro.z, temp.temperature);
   response = response & radio.write(&data, sizeof(data));
 
+  radio.startListening();
   return response;
 }
 

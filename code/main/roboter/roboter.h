@@ -21,7 +21,7 @@
 const int doDebug = 0;
 const byte controllerAddress[6] = "00001";
 const byte serverAddress[6] = "00002";
-const int pushDataTimestamp = 500;
+const int pushDataTimestamp = 100;
 
 //CE, CSN
 RF24 radio(13, 12);
