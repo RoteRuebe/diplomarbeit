@@ -52,11 +52,6 @@ void loop() {
   
   if (crntMillis - prevMillis > pushDataTimestamp) {
     // Push sensor data
-    mpu.getEvent(&gyro_a, &gyro_g, &gyro_temp);
-
-    char data_str[16];
-    sprintf(data_str, "%d", gyro_g.gyro.x);
-
     logMsg("Sending Sensordata.");
     sendSensorData( data_str );
     prevMillis = crntMillis;
@@ -166,20 +161,21 @@ int logMsg(char *x, int listenAfter = 1) {
   return resp;
 }
 
-int sendSensorData(char *x, int listenAfter = 1) {
-  int resp;
+int sendSensorData() {
   radio.stopListening();
-  radio.openWritingPipe( serverAddress );
 
-  char msg[8] = "data,";
-  strcat(msg, x);
-  resp = radio.write( &msg, sizeof(msg) );
+  int response;
+  char data[32];
+  sprintf(data, "vibration,%d", digitalRead(p_vibration));
+  response = radio.write( &data, sizeof(data) );
 
-  if (listenAfter) {
-    radio.startListening();
-  }
+  sensors_event_t gyro_a, gyro_g, gyro_temp;
+  mpu.getEvent(&gyro_a, &gyro_g, &gyro_temp);
+  sprintf(data, "gyro,%d,%d,%d,%d,%d,%d,%d", 
+  a.acceleration.x, a.acceleration.y, a.acceleration.z, g.gyro.x, g.gyro.y, g.gyro.z);
+  response = response & radio.write(&data, sizeof(data));
 
-  return resp;
+  return response;
 }
 
 float fmap(float x, float in_min, float in_max, float out_min, float out_max) {

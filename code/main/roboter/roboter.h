@@ -29,7 +29,7 @@ void drive(int left, int right);
 void rgbWrite(int r, int g, int b);
 float fmap(float x, float in_min, float in_max, float out_min, float out_max);
 int logMsg(char *x, int listenAfter = 1);
-int sendSensorData(char* x, int listenAfter = 1);
+int sendSensorData();
 
 int speed = 0;
 float turn;
@@ -42,5 +42,3 @@ int joyX, joyY, shoL, shoR;
 
 
 Adafruit_MPU6050 mpu;
-int gyro_a_x, gyro_a_y, gyro_a_z, gyro_g_x, gyro_g_y, gyro_g_z;
-sensors_event_t gyro_a, gyro_g, gyro_temp;

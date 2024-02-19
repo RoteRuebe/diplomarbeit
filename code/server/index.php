@@ -72,7 +72,8 @@
     </div>
 
     <div id="column2" style="left: 33%" class="column">
-      <canvas id="chart"> </canvas>
+      <canvas id="chart_vibration"> </canvas>
+      <canvad id="chart_gyro"> </canvas>
     </div>
 
     <div id="column3" style="left: 66%" class="column">
@@ -84,34 +85,67 @@
     </div>
 
     <script>
-      let xValues = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-      let yValues = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-      const chart = new Chart("chart", {
+      let xValues = Array.from( Array(100).keys )
+      const chart = new Chart("chart_vibration", {
         type: "line",
         data: {
           labels: xValues,
           datasets: [{
             borderColor: "blue",
-            data: yValues,
+            data: d_vibration,
             fill: false
           }]
         },
         options: {}
       });
 
+      const chart = new Chart("chart_gyro", {
+        type: "line",
+        data: {
+          labels: xValues,
+          datasets: [
+          {
+            borderColor: "red",
+            data: [],
+            fill: false
+          },
+          {
+            borderColor: "blue",
+            data: [],
+            fill: false
+          },
+          {
+            borderColor: "green",
+            data: [],
+            fill: false
+          }
+        ]},
+        options: {}
+      });
+
+
       function getData() {
         var req = new XMLHttpRequest();
-        req.open("GET", "./log.txt", false);
+        req.open("GET", "./logs/log.txt", false);
         req.send(null);
 
         log_text = document.getElementById("log_text")
         log_text.innerHTML = req.responseText;
         log_text.scrollTop = log_text.scrollHeight
 
-        req.open("GET", "./data.txt", false);
+        req.open("GET", "./logs/acc_x.txt", false);
         req.send(null);
         var arr = req.responseText.split("\n")
-        chart["data"]["datasets"][0]["data"] = arr.slice(-11);
+        chart["data"]["datasets"][0]["data"] = arr.slice(-101);
+        req.open("GET", "./logs/acc_y.txt", false);
+        req.send(null);
+        var arr = req.responseText.split("\n")
+        chart["data"]["datasets"][1]["data"] = arr.slice(-101);
+        req.open("GET", "./logs/acc_z.txt", false);
+        req.send(null);
+        var arr = req.responseText.split("\n")
+        chart["data"]["datasets"][2]["data"] = arr.slice(-101);
+
         chart.update()
       }
       setInterval(getData, 1000);
