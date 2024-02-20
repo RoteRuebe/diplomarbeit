@@ -198,7 +198,7 @@
         chart_gyro.update()
         chart_vibration.update()
       }
-      setInterval(getData, 50);
+      setInterval(getData, 500);
     </script>
 
   </body>

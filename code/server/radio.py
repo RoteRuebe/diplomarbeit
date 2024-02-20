@@ -48,7 +48,7 @@ while True:
     if (radio.available() ):
         rec = radio.read()
         rec = rec.decode("utf-8")
-
+        print(rec)
         try:
             process(rec)
         except Exception as e: continue
