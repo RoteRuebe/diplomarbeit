@@ -168,18 +168,19 @@ int sendSensorData() {
   sensors_event_t a, g, temp;
   mpu.getEvent(&a, &g, &temp);
   
-  sprintf(data, "acc,%d,%d,%d",  
+  sprintf(data, "temp,%.2f", temp.temperature);
+  response = radio.write(&data, sizeof(data));
+
+  sprintf(data, "acc,%.2f,%.2f,%.2f",  
   a.acceleration.x, a.acceleration.y, a.acceleration.z);
   response &= radio.write(&data, sizeof(data));
 
-  sprintf(data, "vibration,%d", digitalRead(p_vibration));
-  response = radio.write( &data, sizeof(data) );
-
-  sprintf(data, "gyro,%d,%d,%d", g.gyro.x, g.gyro.y, g.gyro.z);
+  // Null Bytes to ensure overwriting of previous Message
+  sprintf(data, "gyro,%.2f,%.2f,%.2f\x00\x00\x00\x00\x00", g.gyro.x, g.gyro.y, g.gyro.z);
   response &= radio.write(&data, sizeof(data));
 
-  sprintf(data, "temp,%d", temp.temperature);
-  response &= radio.write(&data, sizeof(data));
+  sprintf(data, "vibration,%d\x00\x00\x00", digitalRead(p_vibration));
+  response &= radio.write( &data, sizeof(data) );
 
   radio.startListening();
   return response;
