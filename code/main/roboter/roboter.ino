@@ -28,9 +28,7 @@ void setup() {
   
   // Open Radio pipes
   radio.openReadingPipe(1, controllerAddress);
-  radio.openWritingPipe(serverAddress);
-  
-  radio.startListening();
+  radio.openWritingPipe(serverAddress); 
   radio.setPALevel(RF24_PA_MIN);
   
   if(logMsg("Radio initalized."))
@@ -38,13 +36,18 @@ void setup() {
   else
     rgbWrite(0, 0, 1);
 
-  mpu.begin();
-  mpu.setAccelerometerRange(MPU6050_RANGE_8_G);
-  mpu.setGyroRange(MPU6050_RANGE_500_DEG);
-  mpu.setFilterBandwidth(MPU6050_BAND_260_HZ);
+  if(mpu.begin()) {
+    logMsg("Gyro Initialized.");
 
-  logMsg("Gyro Initialized.");
-  
+    mpu.setAccelerometerRange(MPU6050_RANGE_8_G);
+    mpu.setGyroRange(MPU6050_RANGE_500_DEG);
+    mpu.setFilterBandwidth(MPU6050_BAND_21_HZ);
+  }
+  else {
+    logMsg("Gyro not connected.");
+  }
+
+  logMsg("Initialization complete.");  
 }
 
 void loop() {
@@ -52,8 +55,11 @@ void loop() {
   
   if (crntMillis - prevMillis > pushDataTimestamp) {
     // Push sensor data
-    logMsg("Sending Sensordata.");
-    sendSensorData();
+    if( sendSensorData() )
+      rgbWrite(0, 1, 0);
+    else
+      rgbWrite(0, 0, 1);
+      
     prevMillis = crntMillis;
   }
 
@@ -162,24 +168,35 @@ int logMsg(char *x, int listenAfter = 1) {
   return resp;
 }
 
+void clearDataArray(char *x) {
+  for(int i = 0; i < 32; i++) {
+    x[i] = "\x00";
+  }
+}
+
 int sendSensorData() {
   radio.stopListening();
 
   int response;
   char data[32] = {0};
-  sprintf(data, "vibration,%d", digitalRead(p_vibration));
-  response = radio.write( &data, sizeof(data) );
-
+  
   sensors_event_t a, g, temp;
   mpu.getEvent(&a, &g, &temp);
-  a.acceleration.x, a.acceleration.y, a.acceleration.z ,%d,%d,%d);
-  response &= radio.write(&data, sizeof(data));
+  
+  sprintf(data, "temp,%.2f", temp.temperature);
+  response = radio.write(&data, sizeof(data));
 
-  sprintf(data, "gyro,%d,%d,%d", g.gyro.x, g.gyro.y, g.gyro.z);
-  response &= radio.write(&data, sizeof(data));
+  clearDataArray(data);
+  sprintf(data, "acc,%.2f,%.2f,%.2f", a.acceleration.x, a.acceleration.y, a.acceleration.z);
+  response |= radio.write(&data, sizeof(data));
 
-  sprintf(data, "temp,%d", temp.temperature);
-  response &= radio.write(&data, sizeof(data));
+  clearDataArray(data);
+  sprintf(data, "gyro,%.2f,%.2f,%.2f", g.gyro.x, g.gyro.y, g.gyro.z);
+  response |= radio.write(&data, sizeof(data));
+
+  clearDataArray(data);
+  sprintf(data, "vibration,%d", digitalRead(p_vibration));
+  response |= radio.write( &data, sizeof(data) );
 
   radio.startListening();
   return response;
