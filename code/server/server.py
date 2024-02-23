@@ -1,7 +1,8 @@
 
 import RPi.GPIO as gpio
 from pyrf24 import *
-import sys, time
+import sys, time, threading
+from flask import Flask
 
 p_ce = 25
 p_csn = 8
@@ -44,11 +45,20 @@ def process(x):
     elif x[0] == "temp":
         write_log("temp", x[1])
 
-while True:
-    if (radio.available() ):
-        rec = radio.read()
-        rec = rec.decode("utf-8")
-        print(rec)
-        try:
-            process(rec)
-        except Exception as e: continue
+def serviceRadio():
+    while True:
+        if (radio.available() ):
+            rec = radio.read()
+            rec = rec.decode("utf-8")
+            #print(rec)
+            try:
+                process(rec)
+            except Exception as e: continue
+
+threading.Thread(target=serviceRadio, args=() ).start()
+
+app = Flask(__name__)
+
+@app.route("/")
+def index():
+    return "jo"
