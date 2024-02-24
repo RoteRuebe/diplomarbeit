@@ -78,7 +78,7 @@ void loop() {
 
   else
     speed = -shoL;
-  
+
   turn = (float)joyX / 256.0;  
   if (joyX < 0) {
     l_motor_turn = fmap(turn, -1.0, 0.0, -1.0, 1.0);

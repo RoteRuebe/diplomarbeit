@@ -84,16 +84,16 @@ function callBackLog(req) {
 }
 
 function callBackAcc(req) {
-    chart_acc["data"]["datasets"][1]["data"] = req.response[0]
-    chart_acc["data"]["datasets"][2]["data"] = req.response[1]
-    chart_acc["data"]["datasets"][0]["data"] = req.response[2]
+    chart_acc["data"]["datasets"][1]["data"] = req.response["x"]
+    chart_acc["data"]["datasets"][2]["data"] = req.response["y"]
+    chart_acc["data"]["datasets"][0]["data"] = req.response["z"]
     chart_acc.update()
 }
 
 function callBackGyro(req) {
-    chart_gyro["data"]["datasets"][0]["data"] = req.response[0]
-    chart_gyro["data"]["datasets"][1]["data"] = req.response[1]
-    chart_gyro["data"]["datasets"][2]["data"] = req.response[2]
+    chart_gyro["data"]["datasets"][0]["data"] = req.response["x"]
+    chart_gyro["data"]["datasets"][1]["data"] = req.response["y"]
+    chart_gyro["data"]["datasets"][2]["data"] = req.response["z"]
     chart_gyro.update()
 }
 

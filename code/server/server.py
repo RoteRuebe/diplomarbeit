@@ -12,36 +12,32 @@ accX = deque(maxlen=10)
 accY = deque(maxlen=10)
 accZ = deque(maxlen=10)
 
+vibration = deque(maxlen=10)
 temp = deque(maxlen=10)
 log = deque(maxlen=10)
 
-
 ### Rf24 Thread ###
-def write_log(filename, x):
-    with open(f"./logs/{filename}.txt", "at") as f:
-        f.write( x.split("\x00")[0] + "\n") 
-
 def process(x):
     x = x.split(",")
 
     if x[0] == "log":
-        write_log("log", x[1])
+        log.append(x[1])
 
     elif x[0] == "vibration":
-        write_log("vibration",x[1])
+        vibration.append(x[1])
 
     elif x[0] == "acc":
-        write_log("acc_x", x[1])
-        write_log("acc_y", x[2])
-        write_log("acc_z", x[3])
+        accX.append(x[1])
+        accY.append(x[2])
+        accZ.append(x[3])
   
     elif x[0] == "gyro":
-        write_log("gyro_x", x[1])
-        write_log("gyro_y", x[2])
-        write_log("gyro_z", x[3])
+        gyroX.append(x[1])
+        gyroY.append(x[2])
+        gyroZ.append(x[3])
 
     elif x[0] == "temp":
-        write_log("temp", x[1])
+        temp.append(x[1])
 
 def serviceRadio():
     radio = RF24(25, 0)
@@ -67,22 +63,25 @@ def serviceRadio():
 #threading.Thread(target=serviceRadio, args=() ).start()
             
 ### Webserver ###
-
 app = flask.Flask(__name__)
 
 @app.route("/")
 def index():
     return flask.render_template("index.html", statusRobot="Hello", statusController="World", statusCamera="!")
 
+@app.route("/about")
+def about():
+    return flask.render_template("about.html")
+
 @app.route("/data/<name>")
 def data(name):
-    if name == "log": return ["Testing environment", "Json Data jeah"]
-    elif name == "temp": return [20]
-    elif name == "gyro": return [list(gyroX), list(gyroY), list(gyroZ)]
-    elif name == "acc": return [list(accX), list(accY), list(accZ)]
+    if name == "log": return list(log)
+    elif name == "temp": return list(temp)
+    elif name == "gyro": return { "x": list(gyroX), "y": list(gyroY), "z": list(gyroZ)}
+    elif name == "acc": return { "x": list(accX), "y": list(accY), "z": list(accZ)}
 
     else:
-        return "Error 404 oder so"
+        return "Ressource not found", 404
 
 if __name__ == "__main__":
     app.run()
