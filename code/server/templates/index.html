@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <title> SumoBots </title>
+    <script src = "https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js"> </script>
+
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="icon" type="image/png" href="/favicon.png"> </link>
+  </head>
+
+  <body>
+    <div id="column1" class="column">
+      <p style="text-align: center">
+        Log Nachrichten des Roboters.
+      </p>
+      <textarea id="log_text" readonly=true> </textarea>
+
+      <form action="/index.php" method="post">
+        <input type="text" id="message" placeholder="Command to robot"> </input>
+        <input type="submit" id="submit" value="Send"> </input>
+      </form>
+    </div>
+
+    <div id="column2" style="left: 33%" class="column">
+      <canvas id="chart_vibration"> </canvas>
+      <canvas id="chart_acc"> </canvas>
+      <canvas id="chart_gyro"> </canvas>
+    </div>
+
+    <div id="column3" style="left: 66%" class="column">
+      <ul>
+        <li> <div class="box" style="background-color: green"></div> &ensp; {{ statusRobot }} </li>
+        <li> <div class="box"></div> &ensp; {{ statusController }} </li>
+        <li> <div class="box"></div> &ensp; {{ statusCamer }} </li>
+      </ul>
+    </div>
+
+    <script src = "static/source.js"> </script>
+
+  </body>
+</html>
