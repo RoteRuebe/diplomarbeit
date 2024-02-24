@@ -79,7 +79,7 @@ function sendRequest(url, callback) {
 
 function callBackLog(req) {
     log_text = document.getElementById("log_text")
-    log_text.innerHTML = req.response;
+    log_text.innerHTML = req.response.join("\n");
     log_text.scrollTop = log_text.scrollHeight;
 }
 
