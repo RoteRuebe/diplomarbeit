@@ -1,16 +1,16 @@
 #import RPi.GPIO as gpio
-#from pyrf24 import *
+from pyrf24 import *
 from collections import deque
 import threading, flask
 
 ### Shared Memory ###
-gyroX = deque([1,2,3,4,5,6,7,8,9,10], maxlen=10)
-gyroY = deque([10,9,8,7,6,5,4,3,2,1], maxlen=10)
-gyroZ = deque([5,5,5,5,5,5,5,5,5,5], maxlen=10)
+gyroX = deque(maxlen=100)
+gyroY = deque(maxlen=100)
+gyroZ = deque(maxlen=100)
 
-accX = deque(maxlen=10)
-accY = deque(maxlen=10)
-accZ = deque(maxlen=10)
+accX = deque(maxlen=100)
+accY = deque(maxlen=100)
+accZ = deque(maxlen=100)
 
 vibration = deque(maxlen=10)
 temp = deque(maxlen=10)
@@ -21,20 +21,20 @@ def process(x):
     x = x.split(",")
 
     if x[0] == "log":
-        log.append(x[1])
+        log.append( x[1].split(u"\x00")[0] )
 
     elif x[0] == "vibration":
-        vibration.append(x[1])
+        vibration.append( x[1].split(u"\x00")[0] )
 
     elif x[0] == "acc":
-        accX.append(x[1])
-        accY.append(x[2])
-        accZ.append(x[3])
+        accX.append( float(x[1]) )
+        accY.append( float(x[2]) )
+        accZ.append( float(x[3].split(u"\x00")[0]) )
   
     elif x[0] == "gyro":
-        gyroX.append(x[1])
-        gyroY.append(x[2])
-        gyroZ.append(x[3])
+        gyroX.append( float(x[1]) )
+        gyroY.append( float(x[2]) )
+        gyroZ.append( float(x[3].split(u"\x00")[0]) )
 
     elif x[0] == "temp":
         temp.append(x[1])
@@ -60,7 +60,7 @@ def serviceRadio():
                 process(rec)
             except Exception as e: continue
 
-#threading.Thread(target=serviceRadio, args=() ).start()
+threading.Thread(target=serviceRadio, args=() ).start()
             
 ### Webserver ###
 app = flask.Flask(__name__)

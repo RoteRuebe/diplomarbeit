@@ -1,65 +1,66 @@
+Chart.defaults.global.elements.point.pointStyle = "line"
 const chart_vibration = new Chart("chart_vibration", {
     type: "line",
     data: {
-      labels: [1,2,3,4,5,6,7,8,9,10],
+      labels: Array.from(Array(100).keys()),
       datasets: [{
         borderColor: "blue",
         data: [],
-        fill: true
+        fill: false
       }]
     },
     options: {
-        animation: {duration: 75}
+        animation: {duration: 50}
     }
   });
 
 const chart_acc = new Chart("chart_acc", {
     type: "line",
     data: {
-        labels: [1,2,3,4,5,6,7,8,9,10],
+        labels: Array.from(Array(100).keys()),
         datasets: [{
             borderColor: "red",
             data: [],
-            fill: true
-        },
-        {
-            borderColor: "blue",
-            data: [],
-            fill: true
+            fill: false
         },
         {
             borderColor: "green",
             data: [],
-            fill: true
+            fill: false
+        },
+        {
+            borderColor: "blue",
+            data: [],
+            fill: false
         }
     ]},
     options: {
-        animation: {duration: 75}
+        animation: {duration: 50}
     }
 });
 
 const chart_gyro = new Chart("chart_gyro", {
     type: "line",
     data: {
-        labels: [1,2,3,4,5,6,7,8,9,10],
+        labels: Array.from(Array(100).keys()),
         datasets: [{
             borderColor: "red",
             data: [],
-            fill: true
-        },
-        {
-            borderColor: "blue",
-            data: [],
-            fill: true
+            fill: false
         },
         {
             borderColor: "green",
             data: [],
-            fill: true
+            fill: false
+        },
+        {
+            borderColor: "blue",
+            data: [],
+            fill: false
         }
     ]},
     options: {
-        animation: {duration: 75}
+        animation: {duration: 50}
     }
 });
 
@@ -84,9 +85,9 @@ function callBackLog(req) {
 }
 
 function callBackAcc(req) {
-    chart_acc["data"]["datasets"][1]["data"] = req.response["x"]
-    chart_acc["data"]["datasets"][2]["data"] = req.response["y"]
-    chart_acc["data"]["datasets"][0]["data"] = req.response["z"]
+    chart_acc["data"]["datasets"][0]["data"] = req.response["x"]
+    chart_acc["data"]["datasets"][1]["data"] = req.response["y"]
+    chart_acc["data"]["datasets"][2]["data"] = req.response["z"]
     chart_acc.update()
 }
 
@@ -111,4 +112,4 @@ function getData() {
 
     //chart_vibration.update()
 }
-setInterval(getData, 500);
+setInterval(getData, 100);
