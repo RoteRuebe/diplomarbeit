@@ -108,6 +108,14 @@ function getData() {
         else {
             document.getElementById("robotConnected").innerHTML = "<div class='box'></div> &ensp; Robot Disconnected"
         }
+
+        if (req.response["controllerConnected"] == "True") {
+            document.getElementById("controllerConnected").innerHTML = "<div class='box' style='background-color: green'></div> &ensp; Controller Connected"
+        }
+        else {
+            document.getElementById("controllerConnected").innerHTML = "<div class='box'></div> &ensp; Controller Disconnected"
+        }
+
     });
 
     /*

@@ -17,9 +17,11 @@ temp = deque(maxlen=10)
 log = deque(maxlen=10)
 
 robotConnected = False
+controllerConnected = False
 
 ### Rf24 Thread ###
 def process(x):
+    global controllerConnected
     x = x.split(",")
 
     if x[0] == "log":
@@ -40,6 +42,12 @@ def process(x):
 
     elif x[0] == "temp":
         temp.append(x[1])
+
+    elif x[0] == "controllerConnected":
+        if ( x[1].split(u"\x00")[0] == "1" ):
+            controllerConnected = True
+        else:
+            controllerConnected = False
 
 def serviceRadio():
     global robotConnected
@@ -92,7 +100,7 @@ def data(name):
     elif name == "temp": return list(temp)
     elif name == "gyro": return { "x": list(gyroX), "y": list(gyroY), "z": list(gyroZ)}
     elif name == "acc": return { "x": list(accX), "y": list(accY), "z": list(accZ)}
-    elif name == "status": return {"robotConnected" : str(robotConnected) }
+    elif name == "status": return {"robotConnected" : str(robotConnected), "controllerConnected": str(controllerConnected) }
 
     else:
         return "Ressource not found", 404
