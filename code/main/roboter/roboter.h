@@ -36,8 +36,9 @@ int sendSensorData();
 int speed;
 float turn;
 float l_motor_turn, r_motor_turn;
-int crntMillis, prevMillis;
+int crntMillis, prevMillisData, millisLastPacket;
 int lm_ist, rm_ist, lm_soll, rm_soll;
+int controllerConnected;
 
 int inputs[4];
 int joyX, joyY, shoL, shoR;

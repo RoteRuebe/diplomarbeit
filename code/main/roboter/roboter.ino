@@ -52,21 +52,26 @@ void setup() {
 
 void loop() {
   crntMillis = millis();
-  
-  if (crntMillis - prevMillis > pushDataTimestamp) {
+
+  if (radio.available()) {
+    radio.read(inputs, sizeof(inputs)); 
+    controllerConnected = 1;
+    millisLastPacket = crntMillis;
+  }
+
+  else if (crntMillis - millisLastPacket > 100)
+    controllerConnected = 0;
+
+  if (crntMillis - prevMillisData > pushDataTimestamp) {
     // Push sensor data
     if( sendSensorData() )
       rgbWrite(0, 1, 0);
     else
       rgbWrite(0, 0, 1);
       
-    prevMillis = crntMillis;
+    prevMillisData = crntMillis;
   }
-
-  if (radio.available()) {
-    radio.read(inputs, sizeof(inputs)); 
-    //logMsg("Inputs received");     
-  }
+  
   joyX = inputs[0];
   joyY = inputs[1];
   shoL = inputs[2];
@@ -196,6 +201,10 @@ int sendSensorData() {
 
   clearDataArray(data);
   sprintf(data, "vibration,%d", digitalRead(p_vibration));
+  response |= radio.write( &data, sizeof(data) );
+
+  clearDataArray(data);
+  sprintf(data, "controllerConnected,%d", controllerConnected);
   response |= radio.write( &data, sizeof(data) );
 
   radio.startListening();
