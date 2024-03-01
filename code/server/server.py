@@ -54,9 +54,11 @@ def serviceRadio():
 
     radio.print_details()
 
+    timeNow = 0
+    timeLastPacket = 0
+
     while True:
         timeNow = time.time()
-
         if ( radio.available() ):
             timeLastPacket = time.time()
             robotConnected = True
