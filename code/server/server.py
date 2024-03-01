@@ -1,7 +1,7 @@
 #import RPi.GPIO as gpio
 from pyrf24 import *
 from collections import deque
-import threading, flask
+import threading, flask, time
 
 ### Shared Memory ###
 gyroX = deque(maxlen=100)
@@ -15,6 +15,8 @@ accZ = deque(maxlen=100)
 vibration = deque(maxlen=10)
 temp = deque(maxlen=10)
 log = deque(maxlen=10)
+
+robotConnected = False
 
 ### Rf24 Thread ###
 def process(x):
@@ -40,6 +42,7 @@ def process(x):
         temp.append(x[1])
 
 def serviceRadio():
+    global robotConnected
     radio = RF24(25, 0)
     address = b"00002"
 
@@ -52,16 +55,24 @@ def serviceRadio():
     radio.print_details()
 
     while True:
-        if (radio.available() ):
+        timeNow = time.time()
+
+        if ( radio.available() ):
+            timeLastPacket = time.time()
+            robotConnected = True
+
             rec = radio.read()
             rec = rec.decode("utf-8")
             #print(rec)
             try:
                 process(rec)
-            except Exception as e: continue
+            except Exception as e: print(e)
+
+        if ( timeNow - timeLastPacket >= 0.25):
+            robotConnected = False
 
 threading.Thread(target=serviceRadio, args=() ).start()
-            
+
 ### Webserver ###
 app = flask.Flask(__name__)
 
@@ -79,6 +90,7 @@ def data(name):
     elif name == "temp": return list(temp)
     elif name == "gyro": return { "x": list(gyroX), "y": list(gyroY), "z": list(gyroZ)}
     elif name == "acc": return { "x": list(accX), "y": list(accY), "z": list(accZ)}
+    elif name == "status": return {"robotConnected" : str(robotConnected) }
 
     else:
         return "Ressource not found", 404
