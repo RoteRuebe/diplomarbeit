@@ -1,34 +1,23 @@
 Chart.defaults.global.elements.point.pointStyle = "line"
-const chart_vibration = new Chart("chart_vibration", {
-    type: "line",
-    data: {
-      labels: Array.from(Array(100).keys()),
-      datasets: [{
-        borderColor: "blue",
-        data: [],
-        fill: false
-      }]
-    },
-    options: {
-        animation: {duration: 50}
-    }
-  });
 
 const chart_acc = new Chart("chart_acc", {
     type: "line",
     data: {
         labels: Array.from(Array(100).keys()),
         datasets: [{
+            label: "Acc. X",
             borderColor: "red",
             data: [],
             fill: false
         },
         {
+            label: "Acc. Y",
             borderColor: "green",
             data: [],
             fill: false
         },
         {
+            label: "Acc. Z",
             borderColor: "blue",
             data: [],
             fill: false
@@ -44,16 +33,19 @@ const chart_gyro = new Chart("chart_gyro", {
     data: {
         labels: Array.from(Array(100).keys()),
         datasets: [{
+            label: "Gyro X",
             borderColor: "red",
             data: [],
             fill: false
         },
         {
+            label: "Gyro Y",
             borderColor: "green",
             data: [],
             fill: false
         },
         {
+            label: "Gyro Z",
             borderColor: "blue",
             data: [],
             fill: false

@@ -1,5 +1,14 @@
+/* General */
 html, body {
   font-family: helvetica;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+html {
+  margin: 0;
+  padding: 0;
 }
 
 p {
@@ -10,19 +19,69 @@ textarea {
   position: relative;
   width: 100%;
   height: 50%;
+  margin-top:50px
 }
 
 li {
   list-style-type: none;
 }
+
+/* Navbar */
+#navbar {
+  list-style-type: none;
+  height: 40px;
+  width: 96%;
+  margin: 10px;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid #e7e7e7;
+  background-color: #f3f3f3;
+}
+
+.navelement {
+  float: left;
+  display: block;
+  color: #666;
+  text-align: center;
+  padding: 8px 17px;
+  text-decoration: none;
+}
+
+.navtext {
+  color: #2d2d2d;
+  text-decoration: none;
+  position:relative;
+  z-index:2;
+}
+
+.navtext:hover:not(.active) {
+  background-color: #ddd;
+}
+
+.navelementActive {
+  color: white;
+  background-color: #04AA6D;
+}
+
+
 .column {
   position: absolute;
   width: 30%;
   height: 100%;
-  top: 0px;
-  padding: 3%
+  top: 40px;
+  margin: 3%;
+  margin-top: 30px;
 }
 
+#statusList {
+  margin-top:50px;
+}
+
+/* Specific */
+.chartjs-render-monitor {
+  margin-top: 50px;
+  margin-bottom: 50px;
+}
 .box {
   position: relative;
   display: inline-block;
@@ -44,4 +103,12 @@ li {
 #chart {
   width: 100%;
   height: 50%;
+}
+
+#htl-logo {
+  position:absolute;
+  width: 25%;
+  right: 0;
+  bottom: 0;
+  margin: 20px;
 }
