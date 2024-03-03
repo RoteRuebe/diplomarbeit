@@ -78,7 +78,7 @@ def serviceRadio():
                 process(rec)
             except Exception as e: print(e)
 
-        if ( timeNow - timeLastPacket >= 0.25):
+        elif ( timeNow - timeLastPacket >= 0.25):
             robotConnected = False
 
 #threading.Thread(target=serviceRadio, args=() ).start()
@@ -88,7 +88,7 @@ app = flask.Flask(__name__)
 
 @app.route("/")
 def index():
-    return flask.render_template("index.html", statusRobot="Hello", statusController="World", statusCamera="!")
+    return flask.render_template("index.html")
 
 @app.route("/about")
 def about():

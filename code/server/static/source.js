@@ -62,7 +62,6 @@ function sendRequest(url, callback) {
     req.open("GET", url);
     req.send();
 
-    // the response is {"message": "Hello, world!"}
     req.onreadystatechange = function() {
         if(req.readyState == 4) {
             callback(req)
