@@ -1,0 +1,18 @@
+Protokoll
+
+0. LCD screen verwenden
+https://circuitdigest.com/microcontroller-projects/interfacing-tft-lcd-display-with-raspberry-pi-zero-w
+nach diesem tutorial
+
+1. Abschalten von Mousecursor
+in /etc/lightdm/lightdm.conf steht jetzt
+xserver-command = X -nocursor
+
+touchscreen geht immernoch
+
+2. Chromium in kiosk starten
+Sobald desktop-environ startet wird /etc/xdg/lxsession/LXDE-pi/autostart ausgeführt.
+hier steht jetzt zusätzlich:
+
+@chromium-browser --kiosk http://sumobot.at
+kiosk damit keine url etc angezeigt wird
