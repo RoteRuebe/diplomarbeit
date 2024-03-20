@@ -20,7 +20,7 @@
 #define p_green 5
 #define p_blue 6
 
-// Which controller is ist?    
+// Which controller is it?    ist
 const byte robotAddress[6] = "00001";
 
 // CE, CSN
@@ -39,17 +39,14 @@ void setup() {
 
   printf_begin();
   
-  Serial.begin(9600);
-  Serial.println();
-  Serial.print("Attempting to initialize radio module");
-  while (!radio.begin()) {Serial.print(".");delay(500);}
+
+  while (!radio.begin()) {}
   rgbWrite(0, 0, 1);
-  Serial.println();
+  
   radio.openWritingPipe(robotAddress);
   radio.stopListening();
-  radio.setChannel(76);
   radio.setPALevel(RF24_PA_MIN);
-  Serial.println("Radio initialized");
+  
   radio.printDetails();
 
   pinMode(p_lSchulter, INPUT);
@@ -58,12 +55,8 @@ void setup() {
   pinMode(p_joyY, INPUT);
   
   // Do nothing while not connected
-  Serial.print("Attempting to write packet");
-  while ( !radio.write(&data, sizeof(data)) ) {Serial.print(".");delay(500);}
-  Serial.println();
+  while ( !radio.write(&data, sizeof(data)) ) {}
   rgbWrite(0, 1, 0);
-  Serial.println("Packet received");
-  Serial.println("Initialization complete!");
 }
 
 /** Main Loop **/
@@ -74,8 +67,7 @@ void loop() {
   data[2] = 255 - (analogRead(p_lSchulter) >> 2);
   data[3] = 255 - (analogRead(p_rSchulter) >> 2);
 
-  Serial.print( data[0] ); Serial.print(", "); Serial.print( data[1] ); Serial.print(", "); Serial.print( data[2] ); Serial.print(", "); Serial.print( data[3] ); Serial.print(", ");
-  Serial.println( radio.write(&data, sizeof(data)) );
+  radio.write(&data, sizeof(data));
   delay(1);
 }
 
