@@ -4,6 +4,7 @@
 *   Desc: Code for the robot. Handles communication, drives motors serial Interface and LED.
 */
 
+#define robot1
 #include "roboter.h"
 
 /** Initialization **/
@@ -30,6 +31,8 @@ void setup() {
   radio.openReadingPipe(1, controllerAddress);
   radio.openWritingPipe(serverAddress); 
   radio.setPALevel(RF24_PA_MIN);
+  radio.enableDynamicAck();
+  radio.setChannel(controllerChannel);
   
   if(logMsg("Radio initalized."))
     rgbWrite(0, 1, 0);
@@ -63,19 +66,9 @@ void loop() {
     controllerConnected = 0;
 
   if (crntMillis - prevMillisData > pushDataTimestamp) {
-    // Push sensor data
-    if( sendSensorData() )
-      rgbWrite(0, 1, 0);
-    else
-      rgbWrite(0, 0, 1);
-      
+    sendSensorData();
     prevMillisData = crntMillis;
   }
-  
-  joyX = inputs[0];
-  joyY = inputs[1];
-  shoL = inputs[2];
-  shoR = inputs[3];
 
   // Calculate Motor speeds
   if (shoR > shoL)
@@ -98,21 +91,8 @@ void loop() {
   lm_soll = (int)(l_motor_turn * speed);
   rm_soll = (int)(r_motor_turn * speed);
 
-  if (doDebug) {
-    /**
-    logMsg("X: ", 0);
-    logMsg(inputs[0], 0);
-    logMsg("Y: ", 0);
-    logMsg(inputs[1], 0);
-    logMsg("L: ", 0);
-    logMsg(inputs[2], 0);
-    logMsg("R: ", 0);
-    logMsg(inputs[3]);
-    */
-  }
-
   // Slow down acceleration of motors
-  else {
+  if (controllerConnected) {
     if (lm_ist > lm_soll)
       lm_ist -= 1;
 
@@ -126,6 +106,10 @@ void loop() {
       rm_ist += 1;
 
     drive(lm_ist, rm_ist);
+  }
+
+  else {
+    drive(0, 0);
   }
 }
 
@@ -158,57 +142,64 @@ void drive(int left, int right) {
   }
 }
 
-int logMsg(char *x, int listenAfter = 1) {
+int logMsg(char *x) {
   int resp;
   radio.stopListening();
+  radio.setChannel(serverChannel);
 
   char msg[32] = "log,";
   strcat(msg, x);
   resp = radio.write( &msg, sizeof(msg) );
 
-  if (listenAfter) {
-    radio.startListening();
-  }
-
+  radio.startListening();
+  radio.setChannel(controllerChannel);
   return resp;
 }
 
-void clearDataArray(char *x) {
-  for(int i = 0; i < 32; i++) {
-    x[i] = "\x00";
-  }
-}
-
-int sendSensorData() {
+void sendSensorData() {
   radio.stopListening();
+  radio.setChannel(serverChannel);
 
+  static int index = 0;
   int response;
   char data[32] = {0};
   
   sensors_event_t a, g, temp;
   mpu.getEvent(&a, &g, &temp);
   
-  sprintf(data, "temp,%.2f", temp.temperature);
-  response = radio.write(&data, sizeof(data));
+  switch(index) {
+    case(0):
+      sprintf(data, "temp,%.2f", temp.temperature);
+      radio.writeFast(&data, sizeof(data), true);
+      break;
+    
+    case(1):
+      sprintf(data, "acc,%.2f,%.2f,%.2f", a.acceleration.x, a.acceleration.y, a.acceleration.z);
+      radio.writeFast(&data, sizeof(data), true);
+      break;
+    
+    case(2):
+      sprintf(data, "gyro,%.2f,%.2f,%.2f", g.gyro.x, g.gyro.y, g.gyro.z);
+      radio.writeFast(&data, sizeof(data), true);
+      break;
+    
+    case(3):
+      sprintf(data, "vibration,%d", digitalRead(p_vibration));
+      radio.writeFast(&data, sizeof(data), true);
+      break;
+    
+    case(4):
+      sprintf(data, "controllerConnected,%d", controllerConnected);
+      radio.writeFast(&data, sizeof(data), true);
+      break;
+  }
+  radio.txStandBy(1);
 
-  clearDataArray(data);
-  sprintf(data, "acc,%.2f,%.2f,%.2f", a.acceleration.x, a.acceleration.y, a.acceleration.z);
-  response |= radio.write(&data, sizeof(data));
+  index ++;
+  if (index == 5) index = 0;
 
-  clearDataArray(data);
-  sprintf(data, "gyro,%.2f,%.2f,%.2f", g.gyro.x, g.gyro.y, g.gyro.z);
-  response |= radio.write(&data, sizeof(data));
-
-  clearDataArray(data);
-  sprintf(data, "vibration,%d", digitalRead(p_vibration));
-  response |= radio.write( &data, sizeof(data) );
-
-  clearDataArray(data);
-  sprintf(data, "controllerConnected,%d", controllerConnected);
-  response |= radio.write( &data, sizeof(data) );
-
+  radio.setChannel(controllerChannel);
   radio.startListening();
-  return response;
 }
 
 float fmap(float x, float in_min, float in_max, float out_min, float out_max) {
