@@ -1,5 +1,5 @@
-#import RPi.GPIO as gpio
-#from pyrf24 import *
+import RPi.GPIO as gpio
+from pyrf24 import *
 from collections import deque
 import threading, flask, time
 
@@ -49,14 +49,14 @@ def process(x):
         else:
             controllerConnected = False
 
-def serviceRadio():
+def serviceRadio(address, channel):
     global robotConnected
     radio = RF24(25, 0)
-    address = b"00002"
 
     radio.begin()
     radio.openReadingPipe(0, address)
     radio.setPALevel(RF24_PA_MAX)
+    radio.setChannel(channel)
 
     radio.listen = True
 
@@ -81,7 +81,7 @@ def serviceRadio():
         elif ( timeNow - timeLastPacket >= 0.25):
             robotConnected = False
 
-#threading.Thread(target=serviceRadio, args=() ).start()
+threading.Thread(target=serviceRadio, args=(b"r00001", 100) ).start()
 
 ### Webserver ###
 app = flask.Flask(__name__)
