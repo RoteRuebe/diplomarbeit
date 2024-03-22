@@ -11,22 +11,20 @@
 #ifdef robot1
   const byte controllerAddress[6] = "c00001";
   const byte serverAddress[6] = "r00001";
-  #define serverChannel 100
-  #define controllerChannel 25
+  #define CHANNEL 75
 #endif
 
 #ifdef robot2
   const byte controllerAddress[6] = "c00002";
   const byte serverAddress[6] = "r00002";
   #define serverChannel 50
-  #define controllerChannel 75
+  #define CHANNEL 100
 #endif
 
 #ifdef robot3
   const byte controllerAddress[6] = "c00003";
   const byte serverAddress[6] = "r00003";
-  #define serverChannel 0
-  #define controllerChannel 86
+  #define CHANNEL 125
 #endif
 
 #define p_red 8
