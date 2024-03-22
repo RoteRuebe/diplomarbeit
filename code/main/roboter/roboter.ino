@@ -4,7 +4,7 @@
 *   Desc: Code for the robot. Handles communication, drives motors serial Interface and LED.
 */
 
-#define robot1
+#define robot3
 #include "roboter.h"
 
 /** Initialization **/
@@ -198,8 +198,8 @@ void sendSensorData() {
   index ++;
   if (index == 5) index = 0;
 
-  radio.setChannel(controllerChannel);
   radio.startListening();
+  radio.setChannel(controllerChannel);
 }
 
 float fmap(float x, float in_min, float in_max, float out_min, float out_max) {

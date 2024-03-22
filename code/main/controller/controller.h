@@ -17,11 +17,11 @@
 #endif
 
 #ifdef controller2
-  const byte robotAddress[6] = "c0002";
+  const byte robotAddress[6] = "c00002";
   #define robotChannel 75
 #endif
 
 #ifdef controller3
-  const byte robotAddress[6] = "c0003";
-  #define robotChannel 87
+  const byte robotAddress[6] = "c00003";
+  #define robotChannel 86
 #endif

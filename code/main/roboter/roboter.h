@@ -23,10 +23,10 @@
 #endif
 
 #ifdef robot3
-  const byte controllerAddress[6] = "c00001";
-  const byte serverAddress[6] = "r00001";
+  const byte controllerAddress[6] = "c00003";
+  const byte serverAddress[6] = "r00003";
   #define serverChannel 0
-  #define controllerChannel 87
+  #define controllerChannel 86
 #endif
 
 #define p_red 8
