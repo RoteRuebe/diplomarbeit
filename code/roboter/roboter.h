@@ -9,21 +9,21 @@
 
 // Different channels and pipes for every robot
 #ifdef robot1
-  const byte controllerAddress[6] = "c00001";
-  const byte serverAddress[6] = "r00001";
+  const byte controllerAddress[6] = "c-r001";
+  const byte serverAddress[6] = "r-s001";
   #define CHANNEL 75
 #endif
 
 #ifdef robot2
-  const byte controllerAddress[6] = "c00002";
-  const byte serverAddress[6] = "r00002";
+  const byte controllerAddress[6] = "c-r002";
+  const byte serverAddress[6] = "r-s002";
   #define serverChannel 50
   #define CHANNEL 100
 #endif
 
 #ifdef robot3
-  const byte controllerAddress[6] = "c00003";
-  const byte serverAddress[6] = "r00003";
+  const byte controllerAddress[6] = "c-r003";
+  const byte serverAddress[6] = "r-s003";
   #define CHANNEL 125
 #endif
 

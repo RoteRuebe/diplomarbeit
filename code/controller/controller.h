@@ -13,16 +13,16 @@
 
 
 #ifdef controller1
-  const byte robotAddress[6] = "c00001";
+  const byte robotAddress[6] = "c-r001";
   #define CHANNEL 75
 #endif
 
 #ifdef controller2
-  const byte robotAddress[6] = "c00002";
+  const byte robotAddress[6] = "c-r002";
   #define CHANNEL 100
 #endif
 
 #ifdef controller3
-  const byte robotAddress[6] = "c00003";
+  const byte robotAddress[6] = "c-r003";
   #define CHANNEL 125
 #endif
