@@ -1,0 +1,17 @@
+<textarea id="log_text" readonly=true> </textarea>
+
+
+
+<script>
+sendRequest("/data/log", function(req) {
+    log_text = document.getElementById("log_text")
+    log_text.innerHTML = req.response.join("\n");
+    log_text.scrollTop = log_text.scrollHeight;
+});
+
+
+
+    let reqVibration = new XMLHttpRequest();
+    sendRequest(reqVibration, "/data/vibration");
+
+</script>

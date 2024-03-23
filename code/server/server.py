@@ -1,69 +1,70 @@
-import RPi.GPIO as gpio
-from pyrf24 import *
+#import RPi.GPIO as gpio
+#from pyrf24 import *
 from collections import deque
 import threading, flask, time
 
 ### Shared Memory ###
-gyroX = deque(maxlen=100)
-gyroY = deque(maxlen=100)
-gyroZ = deque(maxlen=100)
+gyroX = [deque(maxlen=100),deque(maxlen=100),deque(maxlen=100)]
+gyroY = [deque(maxlen=100),deque(maxlen=100),deque(maxlen=100)]
+gyroZ = [deque(maxlen=100),deque(maxlen=100),deque(maxlen=100)]
 
-accX = deque(maxlen=100)
-accY = deque(maxlen=100)
-accZ = deque(maxlen=100)
+accX = [deque(maxlen=100),deque(maxlen=100),deque(maxlen=100)]
+accY = [deque(maxlen=100),deque(maxlen=100),deque(maxlen=100)]
+accZ = [deque(maxlen=100),deque(maxlen=100),deque(maxlen=100)]
 
-vibration = deque(maxlen=10)
-temp = deque(maxlen=10)
-log = deque(maxlen=10)
+vibration = [deque(maxlen=10),deque(maxlen=10),deque(maxlen=10)]
+temp = [deque(maxlen=10),deque(maxlen=10),deque(maxlen=10)]
+log = [deque(maxlen=10),deque(maxlen=10),deque(maxlen=10)]
 
-robotConnected = False
-controllerConnected = False
+robotConnected = [False, False, False]
+controllerConnected = [False, False, False]
 
 ### Rf24 Thread ###
-def process(x):
+def process(i, x):
     global controllerConnected
-    x = x.split(",")
 
     if x[0] == "log":
-        log.append( x[1].split(u"\x00")[0] )
+        log[i].append( x[1].split(u"\x00")[0] )
 
     elif x[0] == "vibration":
-        vibration.append( x[1].split(u"\x00")[0] )
+        vibrationg[i].append( x[1].split(u"\x00")[0] )
 
     elif x[0] == "acc":
-        accX.append( float(x[1]) )
-        accY.append( float(x[2]) )
-        accZ.append( float(x[3].split(u"\x00")[0]) )
+        accX[i].append( float(x[1]) )
+        accY[i].append( float(x[2]) )
+        accZ[i].append( float(x[3].split(u"\x00")[0]) )
   
     elif x[0] == "gyro":
-        gyroX.append( float(x[1]) )
-        gyroY.append( float(x[2]) )
-        gyroZ.append( float(x[3].split(u"\x00")[0]) )
+        gyroX[i].append( float(x[1]) )
+        gyroY[i].append( float(x[2]) )
+        gyroZ[i].append( float(x[3].split(u"\x00")[0]) )
 
     elif x[0] == "temp":
-        temp.append(x[1])
+        temp[i].append(x[1])
 
     elif x[0] == "controllerConnected":
         if ( x[1].split(u"\x00")[0] == "1" ):
-            controllerConnected = True
+            controllerConnected[i] = True
         else:
-            controllerConnected = False
+            controllerConnected[i] = False
 
-def serviceRadio(address, channel):
+def serviceRadio():
     global robotConnected
     radio = RF24(25, 0)
 
     radio.begin()
-    radio.openReadingPipe(0, address)
     radio.setPALevel(RF24_PA_MAX)
-    radio.setChannel(channel)
+
+    radio.openReadingPipe(0, b"r-s000")
+    radio.openReadingPipe(1, b"r-s001")
+    radio.openReadingPipe(2, b"r-s002")
 
     radio.listen = True
-
     radio.print_details()
 
     timeNow = 0
     timeLastPacket = 0
+    channelIndex = 0
 
     while True:
         timeNow = time.time()
@@ -72,16 +73,17 @@ def serviceRadio(address, channel):
             robotConnected = True
 
             rec = radio.read()
-            rec = rec.decode("utf-8")
+            rec = rec.decode("utf-8").split(",")
             #print(rec)
             try:
-                process(rec)
+                process(rec[0], rec[1:])
             except Exception as e: print(e)
 
         elif ( timeNow - timeLastPacket >= 0.25):
             robotConnected = False
 
-threading.Thread(target=serviceRadio, args=(b"r00001", 100) ).start()
+#threading.Thread(target=serviceRadio, args=(b"r00001", 100) ).start()
+gyroX = [ [i for i in range(100)],  [50 for i in range(100)],  [100-i for i in range(100)] ]
 
 ### Webserver ###
 app = flask.Flask(__name__)
@@ -94,13 +96,14 @@ def index():
 def about():
     return flask.render_template("about.html")
 
-@app.route("/data/<name>")
-def data(name):
-    if name == "log": return list(log)
-    elif name == "temp": return list(temp)
-    elif name == "gyro": return { "x": list(gyroX), "y": list(gyroY), "z": list(gyroZ)}
-    elif name == "acc": return { "x": list(accX), "y": list(accY), "z": list(accZ)}
-    elif name == "status": return {"robotConnected" : str(robotConnected), "controllerConnected": str(controllerConnected) }
+@app.route("/data/<name>/<id>")
+def data(name,id):
+    id = int(id)
+    if name == "log": return list(log[id])
+    elif name == "temp": return list(temp[id])
+    elif name == "gyro": return { "x": list(gyroX[id]), "y": list(gyroY[id]), "z": list(gyroZ[id])}
+    elif name == "acc": return { "x": list(accX[id]), "y": list(accY[id]), "z": list(accZ[id])}
+    elif name == "status": return {"robotConnected" : str(robotConnected[id]), "controllerConnected": str(controllerConnected[id]) }
 
     else:
         return "Ressource not found", 404

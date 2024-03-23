@@ -67,19 +67,20 @@ li {
   position: absolute;
   width: 30%;
   height: 100%;
-  top: 40px;
-  margin: 3%;
-  margin-top: 30px;
+  top: 20px;
+  margin: 30px;
 }
 
-#statusList {
-  margin-top:50px;
+/*
+.statusList {
+  margin-top:20px;
 }
+*/
 
 /* Specific */
 .chartjs-render-monitor {
-  margin-top: 50px;
-  margin-bottom: 50px;
+  margin-top: 20px;
+  margin-bottom: 20px;
 }
 .box {
   position: relative;
@@ -104,9 +105,14 @@ li {
   height: 50%;
 }
 
+.statusList {
+  margin: auto;
+}
+
 #htl-logo {
-  position:absolute;
-  width: 25%;
-  bottom: 0;
-  margin: 20px;
+  position:relative;
+  width: 20%;
+  margin-top: -1px;
+  margin-right: -1px;
+  float: right;
 }

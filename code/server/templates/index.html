@@ -13,34 +13,45 @@
     <ul id="navbar">
         <li class="navelement navelementActive"> <a class="navtext" href=""> Home </a> </li>
         <li class="navelement"> <a class="navtext" href="/about"> About </a> </li>
+        <li> <img id="htl-logo" src="/static/images/htl_logo.jpg"> </img> </li>
     </ul> 
 
-    <div id="column1" class="column">
-      <textarea id="log_text" readonly=true> </textarea>
 
-      <form action="/index.php" method="post">
-        <input type="text" id="message" placeholder="Command to robot"> </input>
-        <input type="submit" id="submit" value="Send"> </input>
-      </form>
-    </div>
-
-    <div id="column2" style="left: 33%" class="column">
-      <canvas id="chart_acc"> </canvas>
-      <canvas id="chart_gyro"> </canvas>
-    </div>
-
-    <div id="column3" style="left: 66%" class="column">
-      <ul id="statusList">
-        <li id="robotConnected"> </li>
-        <li id="controllerConnected"> </li>
-        <li> &ensp; </li>
-        <li> v2.2 (Knizzante) </li>
+    <div id="column0" class="column">
+      <p style="text-align: center"> Roboter 0 </p>
+      <canvas id="chartAcc0"> </canvas>
+      <canvas id="chartGyro0"> </canvas>
+      
+      <ul id="statusList0">
+        <li id="robotConnected0"> </li>
+        <li id="controllerConnected0"> </li>
       </ul>
-
-      <img id="htl-logo" src="/static/images/htl_logo.jpg"> </img>
     </div>
 
-    <script src = "static/source.js"> </script>
+    <div id="column1" style="left: 33%" class="column">
+      <p style="text-align: center"> Roboter 1 </p>
+      <canvas id="chartAcc1"> </canvas>
+      <canvas id="chartGyro1"> </canvas>
+
+      <ul id="statusList1">
+        <li id="robotConnected1"> </li>
+        <li id="controllerConnected1"> </li>
+      </ul>
+    </div>
+
+    <div id="column2" style="left: 66%" class="column">
+      <p style="text-align: center"> Roboter 2 </p>
+      <canvas id="chartAcc2"> </canvas>
+      <canvas id="chartGyro2"> </canvas>
+      <ul id="statusList2">
+        <li id="robotConnected2"> </li>
+        <li id="controllerConnected2"> </li>
+      </ul>
+    </ul>
+
+    </div>
+
+    <script src = "static/index.js"> </script>
 
   </body>
 </html>
