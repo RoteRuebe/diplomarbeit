@@ -4,7 +4,7 @@
 *   Desc: Code for the robot. Handles communication, drives motors serial Interface and LED.
 */
 
-#define robot1
+#define robot3
 #include "roboter.h"
 
 /** Initialization **/
@@ -31,7 +31,7 @@ void setup() {
   radio.openReadingPipe(1, controllerAddress);
   radio.openWritingPipe(serverAddress); 
   radio.setPALevel(RF24_PA_MIN);
-  radio.setChannel(CHANNEL);
+  radio.setChannel(CONTROLLERCHANNEL);
   radio.enableDynamicAck();
   
   if(logMsg("Radio initalized."))
@@ -58,7 +58,7 @@ void loop() {
 
   if (radio.available()) {
     radio.read(inputs, sizeof(inputs)); 
-    controllerConnected = 1;
+    controllerConnected = 1;const
     millisLastPacket = crntMillis;
   }
 
@@ -136,7 +136,7 @@ void drive(int left, int right) {
     analogWrite(p_rf, right);
     analogWrite(p_rb, 0);
   } 
-  else {
+  else {const
     analogWrite(p_rb, -right);
     analogWrite(p_rf, 0);
   }
@@ -145,26 +145,24 @@ void drive(int left, int right) {
 int logMsg(char *x) {
   int resp;
   radio.stopListening();
+  radio.setChannel(SERVERCHANNEL);
+  delayMicroseconds(333);
 
-  #ifdef robot1
-    char msg[32] = "1,log,";
-  #endif
-  #ifdef robot2
-    char msg[32] = "2,log,";
-  #endif
-  #ifdef robot3
-    char msg[32] = "3,log,";
-  #endif
+  char msg[32] = "log,";
   strcat(msg, x);
   resp = radio.write( &msg, sizeof(msg) );
 
   radio.startListening();
+  radio.setChannel(CONTROLLERCHANNEL);
+  delayMicroseconds(333);
+
   return resp;
 }
 
-#ifdef robot1
 void sendSensorData() {
   radio.stopListening();
+  radio.setChannel(SERVERCHANNEL);
+  delayMicroseconds(500);
 
   static int index = 0;
   int response;
@@ -175,137 +173,40 @@ void sendSensorData() {
   
   switch(index) {
     case(0):
-      sprintf(data, "1,temp,%.2f", temp.temperature);
+      sprintf(data, "temp,%.2f", temp.temperature);
       radio.startWrite(&data, sizeof(data), true);
       break;
     
     case(1):
-      sprintf(data, "1,acc,%.2f,%.2f,%.2f", a.acceleration.x, a.acceleration.y, a.acceleration.z);
+      sprintf(data, "acc,%.2f,%.2f,%.2f", a.acceleration.x, a.acceleration.y, a.acceleration.z);
       radio.startWrite(&data, sizeof(data), true);
       break;
     
     case(2):
-      sprintf(data, "1,gyro,%.2f,%.2f,%.2f", g.gyro.x, g.gyro.y, g.gyro.z);
+      sprintf(data, "gyro,%.2f,%.2f,%.2f", g.gyro.x, g.gyro.y, g.gyro.z);
       radio.startWrite(&data, sizeof(data), true);
       break;
     
     case(3):
-      sprintf(data, "1,vibration,%d", digitalRead(p_vibration));
+      sprintf(data, "vibration,%d", digitalRead(p_vibration));
       radio.startWrite(&data, sizeof(data), true);
       break;
     
     case(4):
-      sprintf(data, "1,controllerConnected,%d", controllerConnected);
+      sprintf(data, "controllerConnected,%d", controllerConnected);
       radio.startWrite(&data, sizeof(data), true);
       break;
   }
 
-  // Dont switch too fast to read mode
-  delay(1);
-
   index ++;
   if (index == 5) index = 0;
 
+  delayMicroseconds(500);
   radio.startListening();
+  radio.setChannel(CONTROLLERCHANNEL);
+  delayMicroseconds(500);
+  return;
 }
-#endif
-
-#ifdef robot2
-void sendSensorData() {
-  radio.stopListening();
-
-  static int index = 0;
-  int response;
-  char data[32] = {0};
-  
-  sensors_event_t a, g, temp;
-  mpu.getEvent(&a, &g, &temp);
-  
-  switch(index) {
-    case(0):
-      sprintf(data, "2,temp,%.2f", temp.temperature);
-      radio.startWrite(&data, sizeof(data), true);
-      break;
-    
-    case(1):
-      sprintf(data, "2,acc,%.2f,%.2f,%.2f", a.acceleration.x, a.acceleration.y, a.acceleration.z);
-      radio.startWrite(&data, sizeof(data), true);
-      break;
-    
-    case(2):
-      sprintf(data, "2,gyro,%.2f,%.2f,%.2f", g.gyro.x, g.gyro.y, g.gyro.z);
-      radio.startWrite(&data, sizeof(data), true);
-      break;
-    
-    case(3):
-      sprintf(data, "2,vibration,%d", digitalRead(p_vibration));
-      radio.startWrite(&data, sizeof(data), true);
-      break;
-    
-    case(4):
-      sprintf(data, "2,controllerConnected,%d", controllerConnected);
-      radio.startWrite(&data, sizeof(data), true);
-      break;
-  }
-
-  // Dont switch too fast to read mode
-  delay(1);
-
-  index ++;
-  if (index == 5) index = 0;
-
-  radio.startListening();
-}
-#endif
-
-#ifdef robot3
-void sendSensorData() {
-  radio.stopListening();
-
-  static int index = 0;
-  int response;
-  char data[32] = {0};
-  
-  sensors_event_t a, g, temp;
-  mpu.getEvent(&a, &g, &temp);
-  
-  switch(index) {
-    case(0):
-      sprintf(data, "3,temp,%.2f", temp.temperature);
-      radio.startWrite(&data, sizeof(data), true);
-      break;
-    
-    case(1):
-      sprintf(data, "3,acc,%.2f,%.2f,%.2f", a.acceleration.x, a.acceleration.y, a.acceleration.z);
-      radio.startWrite(&data, sizeof(data), true);
-      break;
-    
-    case(2):
-      sprintf(data, "3,gyro,%.2f,%.2f,%.2f", g.gyro.x, g.gyro.y, g.gyro.z);
-      radio.startWrite(&data, sizeof(data), true);
-      break;
-    
-    case(3):
-      sprintf(data, "3,vibration,%d", digitalRead(p_vibration));
-      radio.startWrite(&data, sizeof(data), true);
-      break;
-    
-    case(4):
-      sprintf(data, "3,controllerConnected,%d", controllerConnected);
-      radio.startWrite(&data, sizeof(data), true);
-      break;
-  }
-
-  // Dont switch too fast to read mode
-  delay(1);
-
-  index ++;
-  if (index == 5) index = 0;
-
-  radio.startListening();
-}
-#endif
-
 
 float fmap(float x, float in_min, float in_max, float out_min, float out_max) {
   return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;

@@ -30,7 +30,7 @@ void setup() {
   radio.openWritingPipe(robotAddress);
   radio.stopListening();
   radio.setPALevel(RF24_PA_MIN);
-  radio.setChannel(CHANNEL);
+  radio.setChannel(ROBOTCHANNEL);
   
   pinMode(p_lSchulter, INPUT);
   pinMode(p_rSchulter, INPUT);

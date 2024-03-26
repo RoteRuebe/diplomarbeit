@@ -7,24 +7,35 @@
 #include <Adafruit_Sensor.h>
 #include <Wire.h>
 
+/*
+Roboter 1	r00001	100
+Controller 1	c00001	25
+Roboter 2	r00002	50
+Controller 2	c00002	75
+Roboter 3	r00003	0
+Controller 3	c00003	87
+*/
+
 // Different channels and pipes for every robot
 #ifdef robot1
   const byte controllerAddress[6] = "c-r001";
   const byte serverAddress[6] = "r-s001";
-  #define CHANNEL 75
+  #define SERVERCHANNEL 25
+  #define CONTROLLERCHANNEL 75
 #endif
 
 #ifdef robot2
   const byte controllerAddress[6] = "c-r002";
   const byte serverAddress[6] = "r-s002";
-  #define serverChannel 50
-  #define CHANNEL 100
+  #define SERVERCHANNEL 50
+  #define CONTROLLERCHANNEL 100
 #endif
 
 #ifdef robot3
   const byte controllerAddress[6] = "c-r003";
   const byte serverAddress[6] = "r-s003";
-  #define CHANNEL 125
+  #define SERVERCHANNEL 0
+  #define CONTROLLERCHANNEL 125
 #endif
 
 #define p_red 8
