@@ -1,5 +1,5 @@
-#import RPi.GPIO as gpio
-#from pyrf24 import *
+import RPi.GPIO as gpio
+from pyrf24 import *
 from collections import deque
 import threading, flask, time
 
@@ -21,13 +21,11 @@ controllerConnected = [False, False, False]
 
 ### Rf24 Thread ###
 def process(i, x):
-    global controllerConnected
-
     if x[0] == "log":
         log[i].append( x[1].split(u"\x00")[0] )
 
     elif x[0] == "vibration":
-        vibrationg[i].append( x[1].split(u"\x00")[0] )
+        vibration[i].append( x[1].split(u"\x00")[0] )
 
     elif x[0] == "acc":
         accX[i].append( float(x[1]) )
@@ -49,41 +47,56 @@ def process(i, x):
             controllerConnected[i] = False
 
 def serviceRadio():
-    global robotConnected
+    print("Starting thread")
     radio = RF24(25, 0)
 
     radio.begin()
     radio.setPALevel(RF24_PA_MAX)
+    radio.setChannel(25)
 
-    radio.openReadingPipe(0, b"r-s000")
     radio.openReadingPipe(1, b"r-s001")
     radio.openReadingPipe(2, b"r-s002")
+    radio.openReadingPipe(3, b"r-s003")
 
     radio.listen = True
     radio.print_details()
 
     timeNow = 0
-    timeLastPacket = 0
+    timeLastPacket = [0, 0, 0]
+    timeLastSwitch = 0
     channelIndex = 0
+    channels= [25, 50, 0]
 
     while True:
         timeNow = time.time()
+
         if ( radio.available() ):
-            timeLastPacket = time.time()
-            robotConnected = True
+            timeLastPacket[channelIndex] = timeNow
+            robotConnected[channelIndex] = True
 
             rec = radio.read()
             rec = rec.decode("utf-8").split(",")
-            #print(rec)
+
             try:
-                process(rec[0], rec[1:])
+                process(channelIndex, rec)
             except Exception as e: print(e)
 
-        elif ( timeNow - timeLastPacket >= 0.25):
-            robotConnected = False
 
-#threading.Thread(target=serviceRadio, args=(b"r00001", 100) ).start()
-gyroX = [ [i for i in range(100)],  [50 for i in range(100)],  [100-i for i in range(100)] ]
+        elif ( timeNow - timeLastPacket[channelIndex] >= 0.25):
+            robotConnected[channelIndex] = False
+
+        if (timeNow - timeLastSwitch > 0.1):
+            channelIndex += 1
+            if (channelIndex == 3): channelIndex = 0
+            radio.setChannel( channels[channelIndex] )
+
+            # 1ms delay
+            timeForDelay = timeNow
+            while (timeForDelay - timeNow < 1/1000):
+                timeForDelay = time.time()
+
+threading.Thread(target=serviceRadio, args=() ).start()
+#gyroX = [ [i for i in range(100)],  [50 for i in range(100)],  [100-i for i in range(100)] ]
 
 ### Webserver ###
 app = flask.Flask(__name__)
@@ -103,10 +116,9 @@ def data(name,id):
     elif name == "temp": return list(temp[id])
     elif name == "gyro": return { "x": list(gyroX[id]), "y": list(gyroY[id]), "z": list(gyroZ[id])}
     elif name == "acc": return { "x": list(accX[id]), "y": list(accY[id]), "z": list(accZ[id])}
-    elif name == "status": return {"robotConnected" : str(robotConnected[id]), "controllerConnected": str(controllerConnected[id]) }
+    elif name == "status": return { "robotConnected": str(robotConnected[id]), "controllerConnected": str(controllerConnected[id]) }
 
-    else:
-        return "Ressource not found", 404
+    else: return "Ressource not found", 404
 
 if __name__ == "__main__":
     app.run()
