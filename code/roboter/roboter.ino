@@ -31,7 +31,7 @@ void setup() {
   radio.openReadingPipe(1, controllerAddress);
   radio.openWritingPipe(serverAddress); 
   radio.setPALevel(RF24_PA_MIN);
-  radio.setChannel(CONTROLLERCHANNEL);
+  //radio.setChannel(CONTROLLERCHANNEL);
   radio.enableDynamicAck();
   
   if(logMsg("Radio initalized."))
@@ -58,7 +58,7 @@ void loop() {
 
   if (radio.available()) {
     radio.read(inputs, sizeof(inputs)); 
-    controllerConnected = 1;const
+    controllerConnected = 1;
     millisLastPacket = crntMillis;
   }
 
@@ -136,7 +136,7 @@ void drive(int left, int right) {
     analogWrite(p_rf, right);
     analogWrite(p_rb, 0);
   } 
-  else {const
+  else {
     analogWrite(p_rb, -right);
     analogWrite(p_rf, 0);
   }
@@ -145,24 +145,24 @@ void drive(int left, int right) {
 int logMsg(char *x) {
   int resp;
   radio.stopListening();
-  radio.setChannel(SERVERCHANNEL);
-  delayMicroseconds(333);
+  //radio.setChannel(SERVERCHANNEL);
+  //delayMicroseconds(333);
 
   char msg[32] = "log,";
   strcat(msg, x);
   resp = radio.write( &msg, sizeof(msg) );
 
   radio.startListening();
-  radio.setChannel(CONTROLLERCHANNEL);
-  delayMicroseconds(333);
+  //radio.setChannel(CONTROLLERCHANNEL);
+  //delayMicroseconds(333);
 
   return resp;
 }
 
 void sendSensorData() {
   radio.stopListening();
-  radio.setChannel(SERVERCHANNEL);
-  delayMicroseconds(500);
+  //radio.setChannel(SERVERCHANNEL);
+  //delayMicroseconds(500);
 
   static int index = 0;
   int response;
@@ -203,8 +203,8 @@ void sendSensorData() {
 
   delayMicroseconds(500);
   radio.startListening();
-  radio.setChannel(CONTROLLERCHANNEL);
-  delayMicroseconds(500);
+  //radio.setChannel(CONTROLLERCHANNEL);
+  //delayMicroseconds(500);
   return;
 }
 
