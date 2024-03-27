@@ -22,22 +22,9 @@ void setup() {
 
   pinMode(p_vibration, INPUT);
   
-  rgbWrite(1, 0, 0);
-  
-  // Do nothing while radio module not connected
-  while ( !radio.begin() ) {}
-  
-  // Open Radio pipes
-  radio.openReadingPipe(1, controllerAddress);
-  radio.openWritingPipe(serverAddress); 
-  radio.setPALevel(RF24_PA_MIN);
-  //radio.setChannel(CONTROLLERCHANNEL);
-  radio.enableDynamicAck();
-  
-  if(logMsg("Radio initalized."))
-    rgbWrite(0, 1, 0);
-  else
-    rgbWrite(0, 0, 1);
+  rgbWrite(1, 0, 0); // red
+
+  configureRadio();
 
   if(mpu.begin()) {
     logMsg("Gyro Initialized.");
@@ -56,7 +43,15 @@ void setup() {
 void loop() {
   crntMillis = millis();
 
-  if (radio.available()) {
+  if (radio.failureDetected) {
+    drive(0, 0);
+
+    //blocks until radio configured
+    configureRadio();
+    logMsg("Radio reconfigured after failure");
+  }
+
+  else if (radio.available()) {
     radio.read(inputs, sizeof(inputs)); 
     controllerConnected = 1;
     millisLastPacket = crntMillis;
@@ -66,9 +61,18 @@ void loop() {
     controllerConnected = 0;
 
   if (crntMillis - prevMillisData > pushDataTimestamp) {
-    sendSensorData();
+    serverConnected = sendSensorData();
     prevMillisData = crntMillis;
   }
+
+  if (serverConnected && controllerConnected)
+    rgbWrite(0, 1, 0); // green
+  else if (!serverConnected && controllerConnected)
+    rgbWrite(0, 0, 1); // blue
+  else if (serverConnected && !controllerConnected)
+    rgbWrite(1, 1, 0); // yellow
+  else if (!serverConnected && !controllerConnected )
+    rgbWrite(0, 1, 1); // cyan
 
   // Calculate Motor speeds
   if (shoR > shoL)
@@ -115,6 +119,19 @@ void loop() {
 
 /** Functions **/
 
+void configureRadio() {
+  // Do nothing while radio module not connected
+  rgbWrite(1, 0, 0);
+  while ( !radio.begin() ) {}
+  
+  radio.openReadingPipe(1, controllerAddress);
+  radio.openWritingPipe(serverAddress); 
+  radio.setPALevel(RF24_PA_MIN);
+  radio.setChannel(CONTROLLERCHANNEL);
+  radio.setRetries(4, 10);
+}
+
+
 void rgbWrite(int r, int g, int b) {
   digitalWrite(p_red, r);
   digitalWrite(p_green, g);
@@ -145,24 +162,24 @@ void drive(int left, int right) {
 int logMsg(char *x) {
   int resp;
   radio.stopListening();
-  //radio.setChannel(SERVERCHANNEL);
-  //delayMicroseconds(333);
+  radio.setChannel(SERVERCHANNEL);
+  delayMicroseconds(500);
 
   char msg[32] = "log,";
   strcat(msg, x);
   resp = radio.write( &msg, sizeof(msg) );
 
   radio.startListening();
-  //radio.setChannel(CONTROLLERCHANNEL);
-  //delayMicroseconds(333);
+  radio.setChannel(CONTROLLERCHANNEL);
+  delayMicroseconds(500);
 
   return resp;
 }
 
-void sendSensorData() {
+int sendSensorData() {
   radio.stopListening();
-  //radio.setChannel(SERVERCHANNEL);
-  //delayMicroseconds(500);
+  radio.setChannel(SERVERCHANNEL);
+  delayMicroseconds(500);
 
   static int index = 0;
   int response;
@@ -174,38 +191,37 @@ void sendSensorData() {
   switch(index) {
     case(0):
       sprintf(data, "temp,%.2f", temp.temperature);
-      radio.startWrite(&data, sizeof(data), true);
+      response = radio.write(&data, sizeof(data));
       break;
     
     case(1):
       sprintf(data, "acc,%.2f,%.2f,%.2f", a.acceleration.x, a.acceleration.y, a.acceleration.z);
-      radio.startWrite(&data, sizeof(data), true);
+      response = radio.write(&data, sizeof(data));
       break;
     
     case(2):
       sprintf(data, "gyro,%.2f,%.2f,%.2f", g.gyro.x, g.gyro.y, g.gyro.z);
-      radio.startWrite(&data, sizeof(data), true);
+      response = radio.write(&data, sizeof(data));
       break;
     
     case(3):
       sprintf(data, "vibration,%d", digitalRead(p_vibration));
-      radio.startWrite(&data, sizeof(data), true);
+      response = radio.write(&data, sizeof(data));
       break;
     
     case(4):
       sprintf(data, "controllerConnected,%d", controllerConnected);
-      radio.startWrite(&data, sizeof(data), true);
+      response = radio.write(&data, sizeof(data));
       break;
   }
 
   index ++;
   if (index == 5) index = 0;
 
-  delayMicroseconds(500);
   radio.startListening();
-  //radio.setChannel(CONTROLLERCHANNEL);
-  //delayMicroseconds(500);
-  return;
+  radio.setChannel(CONTROLLERCHANNEL);
+  delayMicroseconds(500);
+  return response;
 }
 
 float fmap(float x, float in_min, float in_max, float out_min, float out_max) {

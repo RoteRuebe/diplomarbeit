@@ -53,18 +53,19 @@ const int pushDataTimestamp = 100/5;
 
 //CE, CSN
 RF24 radio(13, 12);
+void configureRadio();
 void drive(int left, int right);
 void rgbWrite(int r, int g, int b);
 float fmap(float x, float in_min, float in_max, float out_min, float out_max);
 int logMsg(char *x);
-void sendSensorData();
+int sendSensorData();
 
 int speed;
 float turn;
 float l_motor_turn, r_motor_turn;
 int crntMillis, prevMillisData, millisLastPacket;
 int lm_ist, rm_ist, lm_soll, rm_soll;
-int controllerConnected;
+int controllerConnected, serverConnected;
 
 int inputs[4];
 #define joyX inputs[0]

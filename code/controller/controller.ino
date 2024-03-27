@@ -32,6 +32,8 @@ void setup() {
   radio.setPALevel(RF24_PA_MIN);
   radio.setChannel(ROBOTCHANNEL);
   
+  );
+  
   pinMode(p_lSchulter, INPUT);
   pinMode(p_rSchulter, INPUT);
   pinMode(p_joyX, INPUT);
