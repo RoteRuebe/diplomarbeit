@@ -52,11 +52,11 @@ def serviceRadio():
 
     radio.begin()
     radio.setPALevel(RF24_PA_MAX)
-    radio.setChannel(25)
+    radio.setChannel(0)
 
-    radio.openReadingPipe(1, b"r-s001")
-    radio.openReadingPipe(2, b"r-s002")
-    radio.openReadingPipe(3, b"r-s003")
+    #radio.openReadingPipe(1, b"r-s01")
+    #radio.openReadingPipe(2, b"r-s02")
+    radio.openReadingPipe(0, b"r-s003")
 
     radio.listen = True
     radio.print_details()
@@ -65,7 +65,7 @@ def serviceRadio():
     timeLastPacket = [0, 0, 0]
     timeLastSwitch = 0
     channelIndex = 0
-    channels= [25, 50, 0]
+    channels= [0, 50, 97]
 
     while True:
         timeNow = time.time()
@@ -76,6 +76,7 @@ def serviceRadio():
 
             rec = radio.read()
             rec = rec.decode("utf-8").split(",")
+            print(rec)
 
             try:
                 process(channelIndex, rec)
@@ -85,15 +86,18 @@ def serviceRadio():
         elif ( timeNow - timeLastPacket[channelIndex] >= 0.25):
             robotConnected[channelIndex] = False
 
-        if (timeNow - timeLastSwitch > 0.1):
+        if (timeNow - timeLastSwitch > 1):
+            print( f"Switching channel to {channels[channelIndex]}")
             channelIndex += 1
             if (channelIndex == 3): channelIndex = 0
             radio.setChannel( channels[channelIndex] )
 
             # 1ms delay
             timeForDelay = timeNow
-            while (timeForDelay - timeNow < 1/1000):
+            while (timeForDelay - timeNow < 1/500):
                 timeForDelay = time.time()
+
+            timeLastSwitch = timeNow
 
 threading.Thread(target=serviceRadio, args=() ).start()
 #gyroX = [ [i for i in range(100)],  [50 for i in range(100)],  [100-i for i in range(100)] ]
