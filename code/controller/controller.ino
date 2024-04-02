@@ -4,7 +4,7 @@
 *   Desc: Code for both controllers. Reads button-values and sends them to Robot.
 */
 
-#define controller1
+#define controller3
 #include "controller.h"
 
 /** Parameters **/
@@ -32,8 +32,6 @@ void setup() {
   radio.setPALevel(RF24_PA_MIN);
   radio.setChannel(ROBOTCHANNEL);
   
-  );
-  
   pinMode(p_lSchulter, INPUT);
   pinMode(p_rSchulter, INPUT);
   pinMode(p_joyX, INPUT);
@@ -47,12 +45,22 @@ void setup() {
 /** Main Loop **/
 
 void loop() {
+  crntMillis = millis();
   data[0] = analogRead(p_joyX)/2 - 255;
   data[1] = analogRead(p_joyY)/2 - 255;
   data[2] = 255 - (analogRead(p_lSchulter) >> 2);
   data[3] = 255 - (analogRead(p_rSchulter) >> 2);
 
-  if( radio.write(data, sizeof(data)) )
+  if( radio.write(data, sizeof(data)) ) {
+    millisLastPacket = crntMillis;
+    robotConnected = 1;
+  }
+  
+  else if (crntMillis - millisLastPacket >= 100) {
+    robotConnected = 0;
+  }
+
+  if (robotConnected)
     rgbWrite(0, 1, 0);
   else
     rgbWrite(0, 0, 1);

@@ -163,15 +163,15 @@ int logMsg(char *x) {
   int resp;
   radio.stopListening();
   radio.setChannel(SERVERCHANNEL);
-  delayMicroseconds(500);
-
+  delay(10);
+  rgbWrite(1, 1, 1);
   char msg[32] = "log,";
   strcat(msg, x);
   resp = radio.write( &msg, sizeof(msg) );
 
   radio.startListening();
   radio.setChannel(CONTROLLERCHANNEL);
-  delayMicroseconds(500);
+  delay(10);
 
   return resp;
 }
@@ -179,7 +179,7 @@ int logMsg(char *x) {
 int sendSensorData() {
   radio.stopListening();
   radio.setChannel(SERVERCHANNEL);
-  delayMicroseconds(500);
+  delay(1);
 
   static int index = 0;
   int response;
@@ -220,7 +220,8 @@ int sendSensorData() {
 
   radio.startListening();
   radio.setChannel(CONTROLLERCHANNEL);
-  delayMicroseconds(500);
+  delay(1);
+  
   return response;
 }
 
