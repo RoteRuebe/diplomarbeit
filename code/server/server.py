@@ -49,17 +49,18 @@ def process(i, x):
 def serviceRadio():
     print("Starting thread")
     radio = RF24(25, 0)
+    while (not radio.begin()):
+        pass
 
-    radio.begin()
-    radio.setPALevel(RF24_PA_MAX)
-    radio.setChannel(0)
+    #radio.setPALevel(RF24_PA_MAX)
 
-    #radio.openReadingPipe(1, b"r-s01")
-    #radio.openReadingPipe(2, b"r-s02")
-    radio.openReadingPipe(0, b"r-s003")
+    radio.openReadingPipe(1, b"1-r-s\x00")
+    radio.openReadingPipe(2, b"2-r-s\x00")
+    radio.openReadingPipe(3, b"3-r-s\x00")
 
     radio.listen = True
     radio.print_details()
+    radio.failureDetected = 0
 
     timeNow = 0
     timeLastPacket = [0, 0, 0]
@@ -68,38 +69,44 @@ def serviceRadio():
     channels= [0, 50, 97]
 
     while True:
+        #print("loop")
         timeNow = time.time()
 
         if ( radio.available() ):
             timeLastPacket[channelIndex] = timeNow
             robotConnected[channelIndex] = True
 
+            #print(timeNow)
             rec = radio.read()
             rec = rec.decode("utf-8").split(",")
-            print(rec)
 
             try:
                 process(channelIndex, rec)
-            except Exception as e: print(e)
+            except: pass
 
 
-        elif ( timeNow - timeLastPacket[channelIndex] >= 0.25):
+        elif ( timeNow - timeLastPacket[channelIndex] >= 0.250):
             robotConnected[channelIndex] = False
+            controllerConnected[channelIndex] = False
 
-        if (timeNow - timeLastSwitch > 1):
-            print( f"Switching channel to {channels[channelIndex]}")
+        if (timeNow - timeLastSwitch > 0.1):
             channelIndex += 1
             if (channelIndex == 3): channelIndex = 0
+
             radio.setChannel( channels[channelIndex] )
 
-            # 1ms delay
+            # 2ms delay
             timeForDelay = timeNow
-            while (timeForDelay - timeNow < 1/500):
+            while (timeForDelay - timeNow < 2/1000):
                 timeForDelay = time.time()
 
             timeLastSwitch = timeNow
 
-threading.Thread(target=serviceRadio, args=() ).start()
+try:
+    threading.Thread(target=serviceRadio, args=() ).start()
+except:
+    sys.exit()
+
 #gyroX = [ [i for i in range(100)],  [50 for i in range(100)],  [100-i for i in range(100)] ]
 
 ### Webserver ###
@@ -125,7 +132,7 @@ def data(name,id):
     else: return "Ressource not found", 404
 
 if __name__ == "__main__":
-    app.run()
+    app.run(host="0.0.0.0")
 
     flask.url_for("static", filename="style.css")
     flask.url_for("static", filename="source.js")
