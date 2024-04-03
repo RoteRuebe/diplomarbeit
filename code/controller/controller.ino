@@ -30,7 +30,6 @@ void setup() {
   radio.openWritingPipe(robotAddress);
   radio.stopListening();
   radio.setPALevel(RF24_PA_MIN);
-  radio.setChannel(ROBOTCHANNEL);
   
   pinMode(p_lSchulter, INPUT);
   pinMode(p_rSchulter, INPUT);
@@ -64,6 +63,9 @@ void loop() {
     rgbWrite(0, 1, 0);
   else
     rgbWrite(0, 0, 1);
+
+  // Avoid crosstalk with other controllers / robots
+  delay(10);
 }
 
 void rgbWrite(int r, int g, int b) {

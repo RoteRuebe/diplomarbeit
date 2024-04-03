@@ -160,68 +160,31 @@ void drive(int left, int right) {
 }
 
 int logMsg(char *x) {
-  int resp;
   radio.stopListening();
-  radio.setChannel(SERVERCHANNEL);
-  delay(10);
-  rgbWrite(1, 1, 1);
-  char msg[32] = "log,";
-  strcat(msg, x);
-  resp = radio.write( &msg, sizeof(msg) );
+  
+  int response = radio.write( x, sizeof(x) );
 
   radio.startListening();
-  radio.setChannel(CONTROLLERCHANNEL);
-  delay(10);
-
-  return resp;
+  return response;
 }
 
 int sendSensorData() {
   radio.stopListening();
-  radio.setChannel(SERVERCHANNEL);
-  delay(1);
 
-  static int index = 0;
-  int response;
-  char data[32] = {0};
-  
   sensors_event_t a, g, temp;
   mpu.getEvent(&a, &g, &temp);
-  
-  switch(index) {
-    case(0):
-      sprintf(data, "temp,%.2f", temp.temperature);
-      response = radio.write(&data, sizeof(data));
-      break;
-    
-    case(1):
-      sprintf(data, "acc,%.2f,%.2f,%.2f", a.acceleration.x, a.acceleration.y, a.acceleration.z);
-      response = radio.write(&data, sizeof(data));
-      break;
-    
-    case(2):
-      sprintf(data, "gyro,%.2f,%.2f,%.2f", g.gyro.x, g.gyro.y, g.gyro.z);
-      response = radio.write(&data, sizeof(data));
-      break;
-    
-    case(3):
-      sprintf(data, "vibration,%d", digitalRead(p_vibration));
-      response = radio.write(&data, sizeof(data));
-      break;
-    
-    case(4):
-      sprintf(data, "controllerConnected,%d", controllerConnected);
-      response = radio.write(&data, sizeof(data));
-      break;
-  }
 
-  index ++;
-  if (index == 5) index = 0;
+  struct DataPayload payload = {
+    0x00,
+    g.gyro.x, g.gyro.y, g.gyro.z, 
+    a.acc.x, a.acc.y, a.acc.z, 
+    temp.temperature,
+    controllerConnected,
+    digitalRead(p_vibration)
+  };
+  int response = radio.write(&payload, sizeof(payload));
 
   radio.startListening();
-  radio.setChannel(CONTROLLERCHANNEL);
-  delay(1);
-  
   return response;
 }
 

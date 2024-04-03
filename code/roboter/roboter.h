@@ -20,22 +20,15 @@ Controller 3	c00003	87
 #ifdef robot1
   const byte controllerAddress[6] = "c-r01";
   const byte serverAddress[6] = "r-s01";
-  #define SERVERCHANNEL 0
-  #define CONTROLLERCHANNEL 25
-#endif
 
 #ifdef robot2
   const byte controllerAddress[6] = "c-r02";
   const byte serverAddress[6] = "r-s02";
-  #define SERVERCHANNEL 50
-  #define CONTROLLERCHANNEL 75
 #endif
 
 #ifdef robot3
   const byte controllerAddress[6] = "c-r03";
   const byte serverAddress[6] = "r-s003";
-  #define SERVERCHANNEL 97
-  #define CONTROLLERCHANNEL 125
 #endif
 
 #define p_red 8
@@ -49,7 +42,7 @@ Controller 3	c00003	87
 
 #define p_vibration 46
 
-const int pushDataTimestamp = 100/5;
+const int pushDataTimestamp = 100;
 
 //CE, CSN
 RF24 radio(13, 12);
@@ -65,7 +58,7 @@ float turn;
 float lm_turn, rm_turn;
 int crntMillis, prevMillisData, millisLastPacket;
 int lm_ist, rm_ist, lm_soll, rm_soll;
-int controllerConnected, serverConnected;
+uint8_t controllerConnected, serverConnected;
 
 int inputs[4];
 #define JOY_X inputs[0]
@@ -74,3 +67,20 @@ int inputs[4];
 #define SHO_R inputs[3]
 
 Adafruit_MPU6050 mpu;
+
+struct DataPayload {
+  uint8_t zero; // should be 0x00 to signify to server it isn't a log message
+
+  float gyroX;
+  float gyroY; 
+  float gyroZ;
+
+  float accX;
+  float accY;
+  float accZ;
+
+  float temp;
+  
+  uint8_t controllerConnected;
+  uint8_t vibration;
+};

@@ -1,7 +1,7 @@
 import RPi.GPIO as gpio
 from pyrf24 import *
 from collections import deque
-import threading, flask, time
+import threading, flask, time, struct
 
 ### Shared Memory ###
 gyroX = [deque(maxlen=100),deque(maxlen=100),deque(maxlen=100)]
@@ -21,82 +21,61 @@ controllerConnected = [False, False, False]
 
 ### Rf24 Thread ###
 def process(i, x):
-    if x[0] == "log":
-        log[i].append( x[1].split(u"\x00")[0] )
+    if ( x[0] == 0x00 ): #Data
+        data = struct.unpack("!B7f2B") # 1 Byte, 7 Floats, 2 Bytes
+        gyroX[i].append(data[1])
+        gyroY[i].append(data[2])
+        gyroZ[i].append(data[3])
 
-    elif x[0] == "vibration":
-        vibration[i].append( x[1].split(u"\x00")[0] )
+        accX[i].append(data[4])
+        accY[i].append(data[5])
+        accZ[i].append(data[6])
 
-    elif x[0] == "acc":
-        accX[i].append( float(x[1]) )
-        accY[i].append( float(x[2]) )
-        accZ[i].append( float(x[3].split(u"\x00")[0]) )
-  
-    elif x[0] == "gyro":
-        gyroX[i].append( float(x[1]) )
-        gyroY[i].append( float(x[2]) )
-        gyroZ[i].append( float(x[3].split(u"\x00")[0]) )
+        temp[i].append(data[7])
+        controllerConnected[i] = data[8]
+        vibration[i] = data[9]
 
-    elif x[0] == "temp":
-        temp[i].append(x[1])
+    else:
 
-    elif x[0] == "controllerConnected":
-        if ( x[1].split(u"\x00")[0] == "1" ):
-            controllerConnected[i] = True
-        else:
-            controllerConnected[i] = False
+        data = struct.unpack("!32s")
+        log[i].append( data[0].decode("ASCII") )
+
 
 def serviceRadio():
     radio = RF24(25, 0)
     while (not radio.begin()):
         pass
 
-    # Match Null-Terminated C Strings
+    # Match Null-Terminated C "Strings"
     radio.openReadingPipe(1, b"1-r-s\x00")
     radio.openReadingPipe(2, b"2-r-s\x00")
     radio.openReadingPipe(3, b"3-r-s\x00")
 
     radio.listen = True
     radio.print_details()
-    radio.failureDetected = 0
 
     timeNow = 0
     timeLastPacket = [0, 0, 0]
-    timeLastSwitch = 0
-    channelIndex = 0
-    channels= [0, 50, 97]
+    index = 0
 
     while True:
         timeNow = time.time()
 
         if ( radio.available() ):
-            timeLastPacket[channelIndex] = timeNow
-            robotConnected[channelIndex] = True
+            timeLastPacket[index] = timeNow
+            robotConnected[index] = True
 
             rec = radio.read()
-            rec = rec.decode("utf-8").split(",")
 
             try:
-                process(channelIndex, rec)
+                process(index, rec)
             except: pass
 
 
-        elif ( timeNow - timeLastPacket[channelIndex] >= 0.250):
-            robotConnected[channelIndex] = False
-            controllerConnected[channelIndex] = False
+        elif ( timeNow - timeLastPacket[index] >= 0.250):
+            robotConnected[index] = False
+            controllerConnected[index] = False
 
-        if (timeNow - timeLastSwitch > 0.1):
-            channelIndex += 1
-            if (channelIndex == 3): channelIndex = 0
-
-            radio.setChannel( channels[channelIndex] )
-
-            # 2ms delay
-            timeForDelay = timeNow
-            while (timeForDelay - timeNow < 2/1000):
-                timeForDelay = time.time()
-
-            timeLastSwitch = timeNow
 
 try:
     threading.Thread(target=serviceRadio, args=() ).start()
