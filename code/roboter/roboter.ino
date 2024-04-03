@@ -75,25 +75,25 @@ void loop() {
     rgbWrite(0, 1, 1); // cyan
 
   // Calculate Motor speeds
-  if (shoR > shoL)
-    speed = shoR;
+  if (SHO_R > SHO_L)
+    speed = SHO_R;
 
   else
-    speed = -shoL;
+    speed = -SHO_L;
 
-  turn = (float)joyX / 256.0;  
-  if (joyX < 0) {
-    l_motor_turn = fmap(turn, -1.0, 0.0, -1.0, 1.0);
-    r_motor_turn = 1.0;
+  turn = (float)JOY_X / 256.0;  
+  if (JOYX < 0) {
+    lm_turn = fmap(turn, -1.0, 0.0, -1.0, 1.0);
+    rm_turn = 1.0;
   }
 
-  else if (joyX >= 0) {
-    l_motor_turn = 1.0;
-    r_motor_turn = fmap(turn, 0.0, 1.0, 1.0, -1.0);
+  else if (JOY_X >= 0) {
+    lm_turn = 1.0;
+    rm_turn = fmap(turn, 0.0, 1.0, 1.0, -1.0);
   }
   
-  lm_soll = (int)(l_motor_turn * speed);
-  rm_soll = (int)(r_motor_turn * speed);
+  lm_soll = (int)(lm_turn * speed);
+  rm_soll = (int)(rm_turn * speed);
 
   // Slow down acceleration of motors
   if (controllerConnected) {

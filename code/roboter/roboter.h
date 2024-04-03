@@ -62,15 +62,15 @@ int sendSensorData();
 
 int speed;
 float turn;
-float l_motor_turn, r_motor_turn;
+float lm_turn, rm_turn;
 int crntMillis, prevMillisData, millisLastPacket;
 int lm_ist, rm_ist, lm_soll, rm_soll;
 int controllerConnected, serverConnected;
 
 int inputs[4];
-#define joyX inputs[0]
-#define joyY inputs[1]
-#define shoL inputs[2]
-#define shoR inputs[3]
+#define JOY_X inputs[0]
+#define JOY_Y inputs[1]
+#define SHO_L inputs[2]
+#define SHO_R inputs[3]
 
 Adafruit_MPU6050 mpu;

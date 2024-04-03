@@ -47,13 +47,11 @@ def process(i, x):
             controllerConnected[i] = False
 
 def serviceRadio():
-    print("Starting thread")
     radio = RF24(25, 0)
     while (not radio.begin()):
         pass
 
-    #radio.setPALevel(RF24_PA_MAX)
-
+    # Match Null-Terminated C Strings
     radio.openReadingPipe(1, b"1-r-s\x00")
     radio.openReadingPipe(2, b"2-r-s\x00")
     radio.openReadingPipe(3, b"3-r-s\x00")
@@ -69,14 +67,12 @@ def serviceRadio():
     channels= [0, 50, 97]
 
     while True:
-        #print("loop")
         timeNow = time.time()
 
         if ( radio.available() ):
             timeLastPacket[channelIndex] = timeNow
             robotConnected[channelIndex] = True
 
-            #print(timeNow)
             rec = radio.read()
             rec = rec.decode("utf-8").split(",")
 
