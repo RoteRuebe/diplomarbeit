@@ -7,28 +7,19 @@
 #include <Adafruit_Sensor.h>
 #include <Wire.h>
 
-/*
-Roboter 1	r00001	100
-Controller 1	c00001	25
-Roboter 2	r00002	50
-Controller 2	c00002	75
-Roboter 3	r00003	0
-Controller 3	c00003	87
-*/
-
 // Different channels and pipes for every robot
 #ifdef robot1
   const byte controllerAddress[6] = "c-r01";
-  const byte serverAddress[6] = "r-s01";
-
+  const byte serverAddress[6] = "1-r-s";
+#endif
 #ifdef robot2
   const byte controllerAddress[6] = "c-r02";
-  const byte serverAddress[6] = "r-s02";
+  const byte serverAddress[6] = "2-r-s";
 #endif
 
 #ifdef robot3
   const byte controllerAddress[6] = "c-r03";
-  const byte serverAddress[6] = "r-s003";
+  const byte serverAddress[6] = "3-r-s";
 #endif
 
 #define p_red 8
@@ -50,7 +41,7 @@ void configureRadio();
 void drive(int left, int right);
 void rgbWrite(int r, int g, int b);
 float fmap(float x, float in_min, float in_max, float out_min, float out_max);
-int logMsg(char *x);
+int logMsg(char *x, int len);
 int sendSensorData();
 
 int speed;

@@ -23,21 +23,21 @@ void setup() {
   pinMode(p_vibration, INPUT);
   
   rgbWrite(1, 0, 0); // red
-
   configureRadio();
+  
 
   if(mpu.begin()) {
-    logMsg("Gyro Initialized.");
+    logMsg("Gyro Initialized.", 17);
 
     mpu.setAccelerometerRange(MPU6050_RANGE_8_G);
     mpu.setGyroRange(MPU6050_RANGE_500_DEG);
     mpu.setFilterBandwidth(MPU6050_BAND_21_HZ);
   }
   else {
-    logMsg("Gyro not connected.");
+    logMsg("Gyro not connected.", 19);
   }
 
-  logMsg("Initialization complete.");  
+  logMsg("Initialization complete.", 24);  
 }
 
 void loop() {
@@ -48,17 +48,18 @@ void loop() {
 
     //blocks until radio configured
     configureRadio();
-    logMsg("Radio reconfigured after failure");
+    logMsg("Radio reconfigured after failure", 32);
   }
 
-  else if (radio.available()) {
+  if (radio.available()) {
     radio.read(inputs, sizeof(inputs)); 
     controllerConnected = 1;
     millisLastPacket = crntMillis;
   }
 
-  else if (crntMillis - millisLastPacket > 100)
+  else if (crntMillis - millisLastPacket >= 500) {
     controllerConnected = 0;
+  }
 
   if (crntMillis - prevMillisData > pushDataTimestamp) {
     serverConnected = sendSensorData();
@@ -82,7 +83,7 @@ void loop() {
     speed = -SHO_L;
 
   turn = (float)JOY_X / 256.0;  
-  if (JOYX < 0) {
+  if (JOY_X < 0) {
     lm_turn = fmap(turn, -1.0, 0.0, -1.0, 1.0);
     rm_turn = 1.0;
   }
@@ -121,13 +122,11 @@ void loop() {
 
 void configureRadio() {
   // Do nothing while radio module not connected
-  rgbWrite(1, 0, 0);
   while ( !radio.begin() ) {}
   
   radio.openReadingPipe(1, controllerAddress);
   radio.openWritingPipe(serverAddress); 
   radio.setPALevel(RF24_PA_MIN);
-  radio.setChannel(CONTROLLERCHANNEL);
   radio.setRetries(4, 10);
 }
 
@@ -159,10 +158,10 @@ void drive(int left, int right) {
   }
 }
 
-int logMsg(char *x) {
+int logMsg(char *x, int len) {
   radio.stopListening();
-  
-  int response = radio.write( x, sizeof(x) );
+
+  int response = radio.write( x, len );
 
   radio.startListening();
   return response;
@@ -177,7 +176,7 @@ int sendSensorData() {
   struct DataPayload payload = {
     0x00,
     g.gyro.x, g.gyro.y, g.gyro.z, 
-    a.acc.x, a.acc.y, a.acc.z, 
+    a.acceleration.x, a.acceleration.y, a.acceleration.z, 
     temp.temperature,
     controllerConnected,
     digitalRead(p_vibration)
