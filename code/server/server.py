@@ -22,7 +22,10 @@ controllerConnected = [False, False, False]
 ### Rf24 Thread ###
 def process(i, x):
     if ( x[0] == 0x00 ): #Data
-        data = struct.unpack("!B7f2B") # 1 Byte, 7 Floats, 2 Bytes
+        data = struct.unpack("< B 7f 2B B", x)
+
+        print(i)
+        print(data)
         gyroX[i].append(data[1])
         gyroY[i].append(data[2])
         gyroZ[i].append(data[3])
@@ -32,13 +35,12 @@ def process(i, x):
         accZ[i].append(data[6])
 
         temp[i].append(data[7])
-        controllerConnected[i] = data[8]
+        controllerConnected[i] = bool( data[8] )
         vibration[i] = data[9]
 
     else:
-
-        data = struct.unpack("!32s")
-        log[i].append( data[0].decode("ASCII") )
+        data = struct.unpack("!32s", x)
+        log[i].append( data[0].decode("ASCII").split( u"\x00" )[0] )
 
 
 def serviceRadio():
@@ -47,9 +49,9 @@ def serviceRadio():
         pass
 
     # Match Null-Terminated C "Strings"
-    radio.openReadingPipe(1, b"1-r-s\x00")
-    radio.openReadingPipe(2, b"2-r-s\x00")
-    radio.openReadingPipe(3, b"3-r-s\x00")
+    radio.openReadingPipe(0, bytearray( b"1-r-s\x00" ))
+    radio.openReadingPipe(1, bytearray( b"2-r-s\x00" ))
+    radio.openReadingPipe(2, bytearray( b"3-r-s\x00" ))
 
     radio.listen = True
     radio.print_details()
@@ -58,10 +60,13 @@ def serviceRadio():
     timeLastPacket = [0, 0, 0]
     index = 0
 
+    print("Listening")
     while True:
         timeNow = time.time()
 
-        if ( radio.available() ):
+        hasPayload, index = radio.available_pipe()
+
+        if ( hasPayload ):
             timeLastPacket[index] = timeNow
             robotConnected[index] = True
 
@@ -69,18 +74,16 @@ def serviceRadio():
 
             try:
                 process(index, rec)
-            except: pass
+            except Exception as e: print(e)
 
 
-        elif ( timeNow - timeLastPacket[index] >= 0.250):
-            robotConnected[index] = False
-            controllerConnected[index] = False
+        for i in range(3):
+            if ( timeNow - timeLastPacket[i] >= 0.250):
+                robotConnected[i] = False
+                controllerConnected[i] = False
 
 
-try:
-    threading.Thread(target=serviceRadio, args=() ).start()
-except:
-    sys.exit()
+threading.Thread(target=serviceRadio, args=() ).start()
 
 #gyroX = [ [i for i in range(100)],  [50 for i in range(100)],  [100-i for i in range(100)] ]
 
@@ -102,7 +105,7 @@ def data(name,id):
     elif name == "temp": return list(temp[id])
     elif name == "gyro": return { "x": list(gyroX[id]), "y": list(gyroY[id]), "z": list(gyroZ[id])}
     elif name == "acc": return { "x": list(accX[id]), "y": list(accY[id]), "z": list(accZ[id])}
-    elif name == "status": return { "robotConnected": str(robotConnected[id]), "controllerConnected": str(controllerConnected[id]) }
+    elif name == "status": return { "robotConnected": str( robotConnected[id] ), "controllerConnected": str( controllerConnected[id] ) }
 
     else: return "Ressource not found", 404
 

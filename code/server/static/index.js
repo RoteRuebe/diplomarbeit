@@ -293,4 +293,4 @@ function getData() {
 
 let index= 0;
 
-setInterval(getData, 100);
+setInterval(getData, 100/9);
