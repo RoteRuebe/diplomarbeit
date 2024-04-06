@@ -39,7 +39,7 @@ def process(i, x):
         vibration[i] = data[9]
 
     else:
-        data = struct.unpack("!32s", x)
+        data = struct.unpack("<32s", x)
         log[i].append( data[0].decode("ASCII").split( u"\x00" )[0] )
 
 
