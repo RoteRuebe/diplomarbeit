@@ -4,7 +4,7 @@
 *   Desc: Code for the robot. Handles communication, drives motors serial Interface and LED.
 */
 
-#define robot3
+#define robot1
 #include "roboter.h"
 
 /** Initialization **/
@@ -20,11 +20,18 @@ void setup() {
   pinMode(p_green, OUTPUT);
   pinMode(p_blue, OUTPUT);
 
+  pinMode(p_breakLight, OUTPUT);
+  pinMode(p_lamp, OUTPUT);
+
   pinMode(p_vibration, INPUT);
+  pinMode(p_color_s0, OUTPUT); digitalWrite(p_color_s0, 1);
+  pinMode(p_color_s1, OUTPUT); digitalWrite(p_color_s1, 1);
+  pinMode(p_color_s2, OUTPUT); digitalWrite(p_color_s2, 1);
+  pinMode(p_color_s3, OUTPUT); digitalWrite(p_color_s3, 0);
+  pinMode(p_color_out, INPUT);
   
   rgbWrite(1, 0, 0); // red
   configureRadio();
-  
 
   if(mpu.begin()) {
     logMsg("Gyro Initialized.", 17);
@@ -37,6 +44,9 @@ void setup() {
     logMsg("Gyro not connected.", 19);
   }
 
+  display.begin(SSD1306_SWITCHCAPVCC, 0x3C);
+  drawFace(Default);
+  
   logMsg("Initialization complete.", 24);  
 }
 
@@ -61,6 +71,21 @@ void loop() {
     controllerConnected = 0;
   }
 
+  if (crntMillis - prevMillisDraw >= 250) {
+    if (pulseIn(p_color_out, LOW) < 40) {
+      drawFace(Dead);
+    }
+  
+    else if ( sensor_a.acceleration.x + sensor_a.acceleration.y + sensor_a.acceleration.z >= 30) {
+      drawFace(Surprised);
+    }
+  
+    else {
+      drawFace(Default);
+    }
+    prevMillisDraw = crntMillis;
+  }
+
   if (crntMillis - prevMillisData > pushDataTimestamp) {
     serverConnected = sendSensorData();
     prevMillisData = crntMillis;
@@ -75,12 +100,18 @@ void loop() {
   else if (!serverConnected && !controllerConnected )
     rgbWrite(0, 1, 1); // cyan
 
-  // Calculate Motor speeds
-  if (SHO_R > SHO_L)
+  // Calculate Motor speeds.acceleration.
+  if (SHO_R >= SHO_L) {
     speed = SHO_R;
+    digitalWrite(p_lamp, 1);
+    digitalWrite(p_breakLight, 0);
+  }
 
-  else
+  else {
     speed = -SHO_L;
+    digitalWrite(p_lamp, 0);
+    digitalWrite(p_breakLight, 1);
+  }
 
   turn = (float)JOY_X / 256.0;  
   if (JOY_X < 0) {
@@ -170,14 +201,13 @@ int logMsg(char *x, int len) {
 int sendSensorData() {
   radio.stopListening();
 
-  sensors_event_t a, g, temp;
-  mpu.getEvent(&a, &g, &temp);
+  mpu.getEvent(&sensor_a, &sensor_g, &sensor_temp);
 
   struct DataPayload payload = {
     0x00,
-    g.gyro.x, g.gyro.y, g.gyro.z, 
-    a.acceleration.x, a.acceleration.y, a.acceleration.z, 
-    temp.temperature,
+    sensor_g.gyro.x, sensor_g.gyro.y, sensor_g.gyro.z, 
+    sensor_a.acceleration.x, sensor_a.acceleration.y, sensor_a.acceleration.z, 
+    sensor_temp.temperature,
     controllerConnected,
     digitalRead(p_vibration)
   };
@@ -189,4 +219,17 @@ int sendSensorData() {
 
 float fmap(float x, float in_min, float in_max, float out_min, float out_max) {
   return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+}
+
+void drawFace(face_t face) {
+  display.clearDisplay();
+
+  if (face == Default)
+    display.drawBitmap(0, 0, defaultFace, SCREEN_WIDTH, SCREEN_HEIGHT, 1);
+  else if (face == Dead)
+    display.drawBitmap(0, 0, deadFace, SCREEN_WIDTH, SCREEN_HEIGHT, 1);
+  else if (face == Surprised)
+    display.drawBitmap(0, 0, surprisedFace, SCREEN_WIDTH, SCREEN_HEIGHT, 1);
+ 
+  display.display();  
 }

@@ -2,8 +2,8 @@
 #include <nRF24L01.h>
 #include <RF24.h>
 
-#define p_lSchulter A2
-#define p_rSchulter A3
+#define p_lSchulter A3
+#define p_rSchulter A2
 #define p_joyX A1
 #define p_joyY A0
 

@@ -6,20 +6,29 @@
 #include <Adafruit_MPU6050.h>
 #include <Adafruit_Sensor.h>
 #include <Wire.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
 
 // Different channels and pipes for every robot
 #ifdef robot1
   const byte controllerAddress[6] = "c-r01";
   const byte serverAddress[6] = "1-r-s";
+
+  #include "bitmaps/bitmap1.h"
 #endif
+
 #ifdef robot2
   const byte controllerAddress[6] = "c-r02";
   const byte serverAddress[6] = "2-r-s";
+  
+  #include "bitmaps/bitmap2.h"
 #endif
 
 #ifdef robot3
   const byte controllerAddress[6] = "c-r03";
   const byte serverAddress[6] = "3-r-s";
+
+  #include "bitmaps/bitmap3.h"
 #endif
 
 #define p_red 8
@@ -32,6 +41,15 @@
 #define p_rb 4  //Right Backward Pin
 
 #define p_vibration 46
+
+#define p_color_s0 45
+#define p_color_s1 44
+#define p_color_s2 48
+#define p_color_s3 47
+#define p_color_out 49
+
+#define p_breakLight 9
+#define p_lamp 41
 
 const int pushDataTimestamp = 100;
 
@@ -47,7 +65,7 @@ int sendSensorData();
 int speed;
 float turn;
 float lm_turn, rm_turn;
-int crntMillis, prevMillisData, millisLastPacket;
+int crntMillis, prevMillisData, millisLastPacket, prevMillisDraw;
 int lm_ist, rm_ist, lm_soll, rm_soll;
 uint8_t controllerConnected, serverConnected;
 
@@ -75,3 +93,14 @@ struct DataPayload {
   uint8_t controllerConnected;
   uint8_t vibration;
 };
+
+sensors_event_t sensor_a, sensor_g, sensor_temp;
+
+#define SCREEN_WIDTH 128 // OLED display width, in pixels
+#define SCREEN_HEIGHT 64 // OLED display height, in pixels
+
+// Declaration for an SSD1306 display connected to I2C (SDA, SCL pins)
+#define OLED_RESET -1 // Reset pin # (or -1 if sharing Arduino reset pin)
+Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
+
+typedef enum { Default, Dead, Surprised} face_t;
